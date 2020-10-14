@@ -1,0 +1,44 @@
+﻿@inherits Base
+
+@this.RenderBody()
+
+@code {
+    [Parameter]
+    public string Text
+    {
+        get;
+        set;
+    }
+
+    [Parameter]
+    public string Type
+    {
+        get;
+        set;
+    }
+
+    [Parameter]
+    public Action OnClick
+    {
+        get;
+        set;
+    }
+
+    public override RenderFragment RenderBody()
+    {
+        this.DoSomething(new Action(() =>
+        {
+        if (string.IsNullOrEmpty(this.Uid) || string.IsNullOrWhiteSpace(this.Uid))
+        {
+            this.Uid = Guid.NewGuid().ToString();
+        }
+
+        this.LoadContent();
+
+        this.Body = @<button id="@this.Uid" class="@this.Class" type="@this.Type" @onclick="@this.OnClick">@this.Text</button>;
+
+        }));
+
+        return this.Body;
+    }
+}

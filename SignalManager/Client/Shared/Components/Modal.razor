@@ -1,0 +1,122 @@
+﻿@typeparam TModel
+@inherits Base
+
+@this.Body
+
+@code {
+    [Inject]
+    public DataControler<TModel> Data
+    {
+        get;
+        set;
+    }
+
+    [Parameter]
+    public TModel Model
+    {
+        get;
+        set;
+    }
+
+    [Parameter]
+    public Action<TModel> OnModelUpdateCallback
+    {
+        get;
+        set;
+    }
+
+    [Parameter]
+    public Action<TModel> OnCancelationCallback
+    {
+        get;
+        set;
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        base.OnInitializedAsync();
+
+        return Task.Run(() =>
+        {
+            this.Body = this.RenderBody();
+        });
+    }
+
+    public override RenderFragment RenderBody()
+    {
+        this.DoSomething(new Action(() =>
+        {
+            if (string.IsNullOrEmpty(this.Uid) || string.IsNullOrWhiteSpace(this.Uid))
+            {
+                this.Uid = Guid.NewGuid().ToString();
+            }
+
+            this.LoadContent();
+
+            if (string.IsNullOrEmpty(this.Class) || string.IsNullOrWhiteSpace(this.Class))
+            {
+                this.Body = @<form id="@this.Uid">
+                                 @foreach (RenderFragment child in this.Content)
+                                 {
+                                     @child
+                                 }
+                             </form>;
+
+                return;
+            }
+
+            this.Body = @<form id="@this.Uid" class="@this.Class">
+                             @foreach (RenderFragment child in this.Content)
+                             {
+                                 @child
+                             }
+                         </form>;
+        }));
+
+        return this.Body;
+    }
+
+    protected async virtual Task OnModelUpdate()
+    {
+        await this.OnModelBindings();
+
+        if (!await this.OnModelValidate())
+        {
+            return;
+        }
+
+        if (!await this.OnModelPush())
+        {
+            return;
+        }
+
+        this.OnModelUpdateCallback?.Invoke(this.Model);
+    }
+
+    protected async virtual Task OnCancelation()
+    {
+        this.OnCancelationCallback?.Invoke(this.Model);
+    }
+
+    protected async virtual Task<bool> OnModelValidate()
+    {
+        return await this.DoSomethingAsync<bool>(new Task<bool>(() => { return true; }));
+    }
+
+    protected async virtual Task OnModelBindings()
+    {
+        await this.DoSomethingAsync();
+    }
+
+    protected async virtual Task<bool> OnModelPush()
+    {
+        await this.DoSomethingAsync();
+
+        return true;
+    }
+
+    protected virtual void OnModelLoad()
+    {
+
+    }
+}

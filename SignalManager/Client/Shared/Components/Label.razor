@@ -1,0 +1,52 @@
+﻿@inherits Base
+
+@this.RenderBody()
+
+@code {
+    [Parameter]
+    public string Text
+    {
+        get;
+        set;
+    }
+
+    [Parameter]
+    public string For
+    {
+        get;
+        set;
+    }
+
+    [Parameter]
+    public bool Bold
+    {
+        get;
+        set;
+    }
+
+    public override RenderFragment RenderBody()
+    {
+        this.DoSomething(new Action(() =>
+        {
+            if (string.IsNullOrEmpty(this.Uid) || string.IsNullOrWhiteSpace(this.Uid))
+            {
+                this.Uid = Guid.NewGuid().ToString();
+            }
+
+            this.LoadContent();
+
+            this.Body = @<label id="@this.Uid" for="@this.For" class="@this.Class" style="@this.Style">
+                             @if (Bold)
+                             {
+                                 <b>@this.Text</b>
+                             }
+                             else
+                             {
+                                 @this.Text
+                             }
+                         </label>;
+        }));
+
+        return this.Body;
+    }
+}

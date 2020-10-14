@@ -1,0 +1,99 @@
+﻿@inherits Nav
+@inject CookieManager CookieManager
+
+@this.Body
+
+@code {
+    [Parameter]
+    public User User
+    {
+        get;
+        set;
+    }
+
+    [Parameter]
+    public Action OnLoginCallback
+    {
+        get;
+        set;
+    }
+
+    [Parameter]
+    public Action OnLogoutCallback
+    {
+        get;
+        set;
+    }
+
+    private bool ShowModal { get; set; } = false;
+
+    protected override Task OnInitializedAsync()
+    {
+        base.OnInitializedAsync();
+
+        return Task.Run(() => {
+            this.Body = this.RenderBody();
+        });
+    }
+
+    protected override void LoadContent()
+    {
+        if (string.IsNullOrEmpty(this.Class) || string.IsNullOrWhiteSpace(this.Class))
+        {
+            this.Class = "navbar navbar-light bg-dark";
+        }
+
+        this.Content = new Collection<RenderFragment>();
+        this.Content.Add(@<Span Parent="this" Text=@this.Title Class="navbar-brand mb-0 h1 text-white text-left text-lg-center text-xl-center flex-grow-1" />);
+        this.Content.Add(this.GetActionButton());
+        this.Content.Add(this.GetModal(this, User));
+    }
+
+    private RenderFragment GetActionButton()
+    {
+        if ((string.IsNullOrEmpty(User.Username) || string.IsNullOrWhiteSpace(User.Username)) || (string.IsNullOrEmpty(User.Password) || string.IsNullOrWhiteSpace(User.Password)))
+        {
+            return @<Button Parent="this" Class="btn btn-dark" Text="Login" OnClick=@(new Action(() => { OnLogin(); })) />;
+        }
+
+        return @<Button Parent="this" Class="btn btn-dark" Text="Logout" OnClick=@(new Action(async () => { await OnLogout(); })) />;
+    }
+
+    private void OnLogin()
+    {
+        this.ShowModal = !this.ShowModal;
+
+        StateHasChanged();
+    }
+
+    private async Task OnModelUpdateCallback(User user)
+    {
+        this.ShowModal = !this.ShowModal;
+
+        User = user;
+
+        this.ReRenderBody();
+
+        await CookieManager.SetCurrentUser(User);
+
+        OnLoginCallback?.Invoke();
+    }
+
+    private async Task OnLogout()
+    {
+        User = new User();
+
+        this.ReRenderBody();
+
+        await CookieManager.SetCurrentUser(new User());
+
+        OnLogoutCallback?.Invoke();
+    }
+
+    private RenderFragment GetModal(Base Parent, User model)
+    {
+        return @<MatDialog @bind-IsOpen="this.ShowModal">
+                    <UserModal Parent="Parent" Model="User" OnModelUpdateCallback=@(new Action<User>(async (u) => await OnModelUpdateCallback(u)))/>
+                </MatDialog>;
+    }
+}

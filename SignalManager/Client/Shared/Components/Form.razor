@@ -1,0 +1,127 @@
+﻿@typeparam TModel
+@inherits Base
+
+@this.Body
+
+@code {
+    [Inject]
+    public TModel Model
+    {
+        get;
+        set;
+    }
+
+    [Inject]
+    public DataControler<TModel> Data
+    {
+        get;
+        set;
+    }
+
+    [Parameter]
+    public Action OnFormSubmitCallBack
+    {
+        get;
+        set;
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        base.OnInitializedAsync();
+
+        if (this.Model == null)
+        {
+            Console.WriteLine("O modelo foi inicializado como nulo.");
+        }
+
+        if (this.Data == null)
+        {
+            Console.WriteLine("A coleção foi inicializada como nula.");
+        }
+
+        return Task.Run(() =>
+        {
+            this.Body = this.RenderBody();
+        });
+    }
+
+    public override RenderFragment RenderBody()
+    {
+        this.DoSomething(new Action(() =>
+        {
+            if (string.IsNullOrEmpty(this.Uid) || string.IsNullOrWhiteSpace(this.Uid))
+            {
+                this.Uid = Guid.NewGuid().ToString();
+            }
+
+            this.LoadContent();
+
+            if (string.IsNullOrEmpty(this.Class) || string.IsNullOrWhiteSpace(this.Class))
+            {
+                this.Body = @<form id="@this.Uid">
+                                 @foreach (RenderFragment child in this.Content)
+                                 {
+                                     @child
+                                 }
+                             </form>;
+
+                return;
+            }
+
+            this.Body = @<form id="@this.Uid" class="@this.Class">
+                             @foreach (RenderFragment child in this.Content)
+                             {
+                                 @child
+                             }
+                         </form>;
+        }));
+
+        return this.Body;
+    }
+
+    protected async virtual Task OnFormSubmit(TModel model)
+    {
+        await this.OnModelBindings(model);
+
+        if (!await this.OnModelValidate(model))
+        {
+            return;
+        }
+
+        if (!await this.OnModelPush(model))
+        {
+            return;
+        }
+
+        this.OnFormSubmitCallBack?.Invoke();
+    }
+
+    protected async virtual Task<bool> OnModelValidate(TModel model)
+    {
+        return await this.DoSomethingAsync<bool>(new Task<bool>(() => { return true; }));
+    }
+
+    protected async virtual Task OnModelBindings(TModel model)
+    {
+        await this.DoSomethingAsync();
+    }
+
+    protected async virtual Task<bool> OnModelPush(TModel model)
+    {
+        await this.DoSomethingAsync();
+
+        return true;
+    }
+
+    protected async virtual Task<bool> OnModelPull(TModel model)
+    {
+        await this.DoSomethingAsync();
+
+        return true;
+    }
+
+    protected virtual void OnModelLoad(TModel model)
+    {
+
+    }
+}

@@ -1,0 +1,46 @@
+﻿@inherits Base
+
+@this.RenderBody()
+
+@code {
+    [Parameter]
+    public string Title
+    {
+        get;
+        set;
+    }
+
+    public override RenderFragment RenderBody()
+    {
+        this.DoSomething(new Action(() =>
+        {
+            if (string.IsNullOrEmpty(this.Uid) || string.IsNullOrWhiteSpace(this.Uid))
+            {
+                this.Uid = Guid.NewGuid().ToString();
+            }
+
+            this.LoadContent();
+
+            if (string.IsNullOrEmpty(this.Class) || string.IsNullOrWhiteSpace(this.Class))
+            {
+                this.Body = @<nav id="@this.Uid">
+                                 @foreach (RenderFragment child in this.Content)
+                                 {
+                                     @child
+                                 }
+                             </nav>;
+
+                return;
+            }
+
+            this.Body = @<nav id="@this.Uid" class="@this.Class">
+                             @foreach (RenderFragment child in this.Content)
+                             {
+                                 @child
+                             }
+                         </nav>;
+        }));
+
+        return this.Body;
+    }
+}

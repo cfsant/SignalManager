@@ -1,0 +1,307 @@
+﻿@inherits Modal<Signal>
+
+@this.Body
+
+@code{
+
+    public DateTime dttOperacao
+    {
+        get;
+        set;
+    }
+
+    public int intAmout
+    {
+        get;
+        set;
+    }
+
+    public int intPair
+    {
+        get;
+        set;
+    }
+
+    public int intDirection
+    {
+        get;
+        set;
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        base.OnInitializedAsync();
+
+        return Task.Run(() => {
+            this.Body = this.RenderBody();
+        });
+    }
+
+    protected override Task OnParametersSetAsync()
+    {
+        return base.OnParametersSetAsync();
+    }
+
+    protected override void LoadContent()
+    {
+        if (string.IsNullOrEmpty(this.Class) || string.IsNullOrWhiteSpace(this.Class))
+        {
+            this.Class = "d-flex flex-column";
+        }
+
+        this.OnModelLoad();
+
+        this.Content = new Collection<RenderFragment>() {
+            this.GetDateInputContainer(this),
+            this.GetAmountInputContainer(this),
+            this.GetPairInputContainer(this),
+            this.GetDirectionInputContainer(this),
+            this.GetCommitButtonContainer(this),
+            this.GetCancelButtonContainer(this)
+        };
+    }
+
+    protected override Task<bool> OnModelPush()
+    {
+        this.Model.Editing = false;
+
+        return base.OnModelPush();
+    }
+
+    protected override void OnModelLoad()
+    {
+        base.OnModelLoad();
+
+        this.dttOperacao = this.Model.Date;
+        this.intAmout = this.Model.Amount;
+        this.intPair = ((int)this.Model.Pair);
+        this.intDirection = ((int)this.Model.Direction);
+    }
+
+    protected override Task<bool> OnModelValidate()
+    {
+        if (this.Model == null || this.Model == default)
+        {
+            Console.WriteLine("Invalid 'MODEL' value.");
+
+            return Task.Run<bool>(() => { return false; });
+        }
+
+        if (this.Model.Date <= DateTime.Now)
+        {
+            Console.WriteLine("Invalid 'DATE' value.");
+
+            return Task.Run<bool>(() => { return false; });
+        }
+
+        if (this.Model.Direction == Signal.Directions.UNDEFINED)
+        {
+            Console.WriteLine("Invalid 'DIRECTION' value.");
+
+            return Task.Run<bool>(() => { return false; });
+        }
+
+        if (this.Model.Pair == Signal.Pairs.UNDEFINED)
+        {
+            Console.WriteLine("Invalid 'PAIR' value.");
+
+            return Task.Run<bool>(() => { return false; });
+        }
+
+        return Task.Run<bool>(() => { return true; });
+    }
+
+    protected override Task OnModelBindings()
+    {
+        this.Model.Date = this.dttOperacao.ToLocalTime();
+        this.Model.Amount = this.intAmout;
+        this.Model.Pair = ((Signal.Pairs)this.intPair);
+        this.Model.Direction = ((Signal.Directions)this.intDirection);
+
+        return base.OnModelBindings();
+    }
+
+    private RenderFragment GetForm()
+    {
+        Base Container = new Base();
+        Container.Parent = this;
+        Container.Class = "form-row justify-content-center w-100";
+
+        Container.Content = new Collection<RenderFragment>(){
+            this.GetDateInputContainer(Container),
+            this.GetAmountInputContainer(Container),
+            this.GetPairInputContainer(Container),
+            this.GetDirectionInputContainer(Container),
+            this.GetCommitButtonContainer(Container)
+        };
+
+        return Container.RenderBody();
+    }
+
+    private RenderFragment GetDateInputContainer(Base Parent)
+    {
+        Base DateInputContainer = new Base();
+        DateInputContainer.Parent = Parent;
+        DateInputContainer.Class = "form-group p-2 w-100";
+
+        if (this.Model == null)
+        {
+            return DateInputContainer.RenderBody();
+        }
+
+        Collection<RenderFragment> DateInputContainerContent = new Collection<RenderFragment>();
+        DateInputContainerContent.Add(@<Label Parent="@DateInputContainer" For="dateInput" Text="Data:"/>);
+        DateInputContainerContent.Add(@<MatDatePicker Outlined="true" TValue="DateTime" Enable24hours="true" EnableSeconds="true" Format="dd/MM/yyyy HH:mm:ss" EnableTime="true" @bind-Value="@this.dttOperacao" Class="w-100" Id="dateInput"/>);
+        DateInputContainerContent.Add(@<Small Parent="@DateInputContainer" Text="Informe a data da operação aqui." Class="form-text text-muted" />);
+
+        DateInputContainer.Content = DateInputContainerContent;
+
+        return DateInputContainer.RenderBody();
+    }
+
+    private RenderFragment GetAmountInputContainer(Base Parent)
+    {
+        Base AmountInputContainer = new Base();
+        AmountInputContainer.Parent = Parent;
+        AmountInputContainer.Class = "form-group p-2 w-100";
+
+        if (this.Model == null)
+        {
+            return AmountInputContainer.RenderBody();
+        }
+
+        Collection<RenderFragment> AmountInputContainerContent = new Collection<RenderFragment>();
+        AmountInputContainerContent.Add(@<Label Parent="@AmountInputContainer" For="amountInput" Text="Valor:"/>);
+        AmountInputContainerContent.Add(@<MatNumericUpDownField @bind-Value="@this.intAmout" Outlined="true" FieldType="MatNumericUpDownFieldType.Currency" DecimalPlaces=2 Class="w-100" Id="amountInput" />);
+        AmountInputContainerContent.Add(@<Small Parent="@AmountInputContainer" Text="Informe o valor da operação aqui." Class="form-text text-muted" />);
+
+        AmountInputContainer.Content = AmountInputContainerContent;
+
+        return AmountInputContainer.RenderBody();
+    }
+
+    private RenderFragment GetPairInputContainer(Base Parent)
+    {
+        Base GoalInputContainer = new Base();
+        GoalInputContainer.Parent = Parent;
+        GoalInputContainer.Class = "form-group p-2 w-100";
+
+        if (this.Model == null)
+        {
+            return GoalInputContainer.RenderBody();
+        }
+
+        Collection<RenderFragment> GoalInputContainerContent = new Collection<RenderFragment>();
+        GoalInputContainerContent.Add(@<Label Parent="@GoalInputContainer" For="pairInput" Text="Par:"/>);
+        GoalInputContainerContent.Add(this.GetPairInputField());
+        GoalInputContainerContent.Add(@<Small Parent="@GoalInputContainer" Text="Informe o par da operação aqui." Class="form-text text-muted" />);
+
+        GoalInputContainer.Content = GoalInputContainerContent;
+
+        return GoalInputContainer.RenderBody();
+    }
+
+    private RenderFragment GetPairInputField()
+    {
+        return @<MatSelect Outlined="true" @bind-Value="@this.intPair" Class="w-100" Id="pairInput">
+                    @foreach (RenderFragment option in this.GetPairInputFieldOptions())
+                    {
+                        @option
+                    }
+                </MatSelect>;
+    }
+
+    private Collection<RenderFragment> GetPairInputFieldOptions()
+    {
+        Collection<RenderFragment> options = new Collection<RenderFragment>();
+
+        foreach (Signal.Pairs goal in Enum.GetValues(typeof(Signal.Pairs)))
+        {
+            options.Add(@<MatOption Value=@((int)goal)>@Enum.GetName(goal.GetType(), goal)</MatOption>);
+        }
+
+        return options;
+    }
+
+    private RenderFragment GetDirectionInputContainer(Base Parent)
+    {
+        Base DirectionInputContainer = new Base();
+        DirectionInputContainer.Parent = Parent;
+        DirectionInputContainer.Class = "form-group p-2 w-100";
+
+        if (this.Model == null)
+        {
+            return DirectionInputContainer.RenderBody();
+        }
+
+        Collection<RenderFragment> DirectionInputContainerContent = new Collection<RenderFragment>();
+        DirectionInputContainerContent.Add(@<Label Parent="@DirectionInputContainer" For="directionInput" Text="Direção:"/>);
+        DirectionInputContainerContent.Add(this.GetDirectionInputField());
+        DirectionInputContainerContent.Add(@<Small Parent="@DirectionInputContainer" Text="Informe a direção da operação aqui." Class="form-text text-muted" />);
+
+        DirectionInputContainer.Content = DirectionInputContainerContent;
+
+        return DirectionInputContainer.RenderBody();
+    }
+
+    private RenderFragment GetDirectionInputField()
+    {
+        return @<MatSelect Outlined="true" @bind-Value="@this.intDirection" Class="w-100" Id="directionInput">
+                    @foreach (RenderFragment option in this.GetDirectionInputFieldOptions())
+                    {
+                        @option
+                    }
+                </MatSelect>;
+    }
+
+    private Collection<RenderFragment> GetDirectionInputFieldOptions()
+    {
+        Collection<RenderFragment> options = new Collection<RenderFragment>();
+
+        foreach (Signal.Directions direction in Enum.GetValues(typeof(Signal.Directions)))
+        {
+            options.Add(@<MatOption Value=@((int)direction)>@Enum.GetName(direction.GetType(), direction)</MatOption>);
+        }
+
+        return options;
+    }
+
+    private RenderFragment GetCommitButtonContainer(Base Parent)
+    {
+        Base DateInputContainer = new Base();
+        DateInputContainer.Parent = Parent;
+        DateInputContainer.Class = "form-group d-flex p-2 w-100 align-items-center";
+        DateInputContainer.Content = new Collection<RenderFragment>();
+        DateInputContainer.Content.Add(this.GetCommitButton());
+
+        return DateInputContainer.RenderBody();
+    }
+
+    private RenderFragment GetCommitButton()
+    {
+        return @<button id="@Guid.NewGuid().ToString()" class="btn btn-dark w-100" type="button" @onclick="OnModelUpdate">Confirmar</button>;
+    }
+
+    private RenderFragment GetCancelButtonContainer(Base Parent)
+    {
+        Base DateInputContainer = new Base();
+        DateInputContainer.Parent = Parent;
+        DateInputContainer.Class = "form-group d-flex p-2 w-100 align-items-center";
+        DateInputContainer.Content = new Collection<RenderFragment>();
+        DateInputContainer.Content.Add(this.GetCancelButton());
+
+        return DateInputContainer.RenderBody();
+    }
+
+    private RenderFragment GetCancelButton()
+    {
+        return @<button id="@Guid.NewGuid().ToString()" class="btn btn-dark w-100" type="button" @onclick="OnCancelation">Cancelar</button>;
+    }
+
+    protected override Task OnCancelation()
+    {
+        this.Model.Editing = false;
+
+        return base.OnCancelation();
+    }
+}

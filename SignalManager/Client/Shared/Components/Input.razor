@@ -1,0 +1,54 @@
+﻿@typeparam TModel
+@inherits Base
+
+@this.RenderBody()
+
+@code {
+    public string Type { get; set; }
+
+    public TModel Value { get; set; }
+
+    [Parameter]
+    public string PType
+    {
+        get
+        {
+            return this.Type;
+        }
+        set
+        {
+            this.Type = value;
+        }
+    }
+
+    [Parameter]
+    public TModel PValue
+    {
+        get
+        {
+            return this.Value;
+        }
+        set
+        {
+            this.Value = value;
+        }
+    }
+
+    public override RenderFragment RenderBody()
+    {
+        this.DoSomething(new Action(() =>
+        {
+        if (string.IsNullOrEmpty(this.Uid) || string.IsNullOrWhiteSpace(this.Uid))
+        {
+            this.Uid = Guid.NewGuid().ToString();
+        }
+
+        this.LoadContent();
+
+        this.Body = @<input id="@this.Uid" class="@this.Class" type="@this.Type" value="@this.Value">;
+
+        }));
+
+        return this.Body;
+    }
+}

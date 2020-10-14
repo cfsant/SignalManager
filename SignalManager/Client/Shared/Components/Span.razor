@@ -1,0 +1,36 @@
+﻿@inherits Base
+
+@this.RenderBody()
+
+@code {
+    [Parameter]
+    public string Text
+    {
+        get;
+        set;
+    }
+
+    public override RenderFragment RenderBody()
+    {
+        this.DoSomething(new Action(() =>
+        {
+            if (string.IsNullOrEmpty(this.Uid) || string.IsNullOrWhiteSpace(this.Uid))
+            {
+                this.Uid = Guid.NewGuid().ToString();
+            }
+
+            this.LoadContent();
+
+            if (string.IsNullOrEmpty(this.Class) || string.IsNullOrWhiteSpace(this.Class))
+            {
+                this.Body = @<span id="@this.Uid">@this.Text</span>;
+
+                return;
+            }
+
+            this.Body = @<span id="@this.Uid" class="@this.Class">@this.Text</span>;
+        }));
+
+        return this.Body;
+    }
+}

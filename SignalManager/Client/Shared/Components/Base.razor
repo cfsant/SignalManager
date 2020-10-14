@@ -1,0 +1,269 @@
+﻿@this.Body
+
+@code {
+    [Inject]
+    protected IJSRuntime JSRuntime
+    {
+        get;
+        set;
+    }
+
+    [Inject]
+    public BagControler DataBag { get; set; }
+
+    [Parameter]
+    public Base Parent
+    {
+        get;
+        set;
+    }
+
+    [Parameter]
+    public Collection<RenderFragment> Content {
+        get;
+        set;
+    }
+
+    [Parameter]
+    public string Class
+    {
+        get;
+        set;
+    }
+
+    [Parameter]
+    public string Style
+    {
+        get;
+        set;
+    }
+
+    public RenderFragment Body
+    {
+        get;
+        set;
+    }
+
+    public string Uid
+    {
+        get;
+        set;
+    }
+
+    protected string Exception
+    {
+        get;
+        set;
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        base.OnInitializedAsync();
+
+        return this.DoSomethingAsync(new Task(() => {
+            this.DataBag = new BagControler();
+            this.RenderBody();
+        }));
+    }
+
+    protected override Task OnParametersSetAsync()
+    {
+        this.Body = this.RenderBody();
+
+        return base.OnParametersSetAsync();
+    }
+
+    protected virtual void LoadContent()
+    {
+        if (this.Content == null)
+        {
+            this.Content = new Collection<RenderFragment>();
+        }
+    }
+
+    public virtual RenderFragment RenderBody()
+    {
+        this.DoSomething(new Action(() =>
+        {
+            if (string.IsNullOrEmpty(this.Uid) || string.IsNullOrWhiteSpace(this.Uid))
+            {
+                this.Uid = Guid.NewGuid().ToString();
+            }
+
+            this.LoadContent();
+
+            if (string.IsNullOrEmpty(this.Class) || string.IsNullOrWhiteSpace(this.Class))
+            {
+                this.Body = @<div id="@this.Uid" style="@this.Style">
+                                     @foreach (RenderFragment child in this.Content)
+                                     {
+                                         @child
+                                     }
+                             </div>;
+
+               return;
+            }
+
+            this.Body = @<div id="@this.Uid" class="@this.Class" style="@this.Style">
+                             @foreach (RenderFragment child in this.Content)
+                             {
+                                 @child
+                             }
+                         </div>;
+        }));
+
+        return this.Body;
+    }
+
+    public async Task Push(RenderFragment child)
+    {
+        await this.DoSomethingAsync(new Task(() =>
+        {
+            if (child == null || child == default)
+            {
+                throw new Exception(string.Format("Invalid child for '{0}'.", this.Uid));
+            }
+
+            this.Content.Add(child);
+        }));
+    }
+
+    protected async virtual Task DoSomethingAsync(Task something = null)
+    {
+        try
+        {
+            if (something == null)
+            {
+                return;
+            }
+
+            await something;
+        }
+        catch (Exception ex)
+        {
+            this.Exception = string.Format("Message: {0} \n Stack: {1}", ex.Message, ex.StackTrace);
+
+            await ThrowException();
+        }
+    }
+
+    protected async virtual Task<T> DoSomethingAsync<T>(Task<T> something = null)
+    {
+        try
+        {
+            if (something == null)
+            {
+                return default;
+            }
+
+            return await something;
+        }
+        catch (Exception ex)
+        {
+            this.Exception = string.Format("Message: {0} \n Stack: {1}", ex.Message, ex.StackTrace);
+
+            await ThrowException();
+
+            return default;
+        }
+    }
+
+    protected virtual void DoSomething(Action something = null)
+    {
+        try
+        {
+            something?.Invoke();
+        }
+        catch (Exception ex)
+        {
+            new Action(async () => {
+                this.Exception = string.Format("Message: {0} \n Stack: {1}", ex.Message, ex.StackTrace);
+                await ThrowException();
+            })?.Invoke();
+        }
+    }
+
+    protected async virtual Task ThrowException()
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(this.Exception) || string.IsNullOrWhiteSpace(this.Exception))
+            {
+                Console.WriteLine("Null/Empty/White space exception.");
+
+                return;
+            }
+
+            Console.WriteLine(string.Format("Ex '{0}': \n{1};", this.GetType().Name, this.Exception));
+
+            await this.JSRuntime.InvokeVoidAsync("throwException", this.Exception);
+        }
+        finally
+        {
+            this.Exception = null;
+        }
+    }
+
+    protected async virtual Task ShowAlert(string Msg)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(Msg) || string.IsNullOrWhiteSpace(Msg))
+            {
+                return;
+            }
+
+            await this.JSRuntime.InvokeVoidAsync("throwException", Msg);
+        }
+        finally
+        {
+            this.Exception = null;
+        }
+    }
+
+    public void SetParamenterValue<T>(string name, T value)
+    {
+        this.DoSomething(() =>
+        {
+            foreach (PropertyInfo property in this.GetType().GetProperties())
+            {
+                if (property.Name.ToUpper() != name.ToUpper())
+                {
+                    continue;
+                }
+
+                if (property.SetMethod == null || property.SetMethod == default)
+                {
+                    continue;
+                }
+
+                property.SetValue(this, value);
+            }
+        });
+    }
+
+    public void PushParamenterCollectionValue<T>(string name, T value)
+    {
+        this.DoSomething(() =>
+        {
+            foreach (PropertyInfo property in this.GetType().GetProperties())
+            {
+                if (property.Name.ToUpper() != name.ToUpper())
+                {
+                    continue;
+                }
+
+                if (property.GetValue(this).GetType() is IList<T> lst)
+                {
+                    lst.Add(value);
+                }
+            }
+        });
+    }
+
+    public virtual void ReRenderBody()
+    {
+        this.Body = this.RenderBody();
+        StateHasChanged();
+    }
+}

@@ -1,0 +1,7 @@
+/node_modules
+/SignalManager/Client/bin
+/SignalManager/Client/obj
+/SignalManager/Server/bin
+/SignalManager/Server/obj
+/SignalManager/Shared/bin
+/SignalManager/Shared/obj

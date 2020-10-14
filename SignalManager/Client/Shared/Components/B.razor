@@ -1,0 +1,38 @@
+﻿@inherits Base
+
+@this.RenderBody()
+
+@code {
+    public string Text { get; set; }
+
+    [Parameter]
+    public string PText
+    {
+        get
+        {
+            return this.Text;
+        }
+        set
+        {
+            this.Text = value;
+        }
+    }
+
+    public override RenderFragment RenderBody()
+    {
+        this.DoSomething(new Action(() =>
+        {
+        if (string.IsNullOrEmpty(this.Uid) || string.IsNullOrWhiteSpace(this.Uid))
+        {
+            this.Uid = Guid.NewGuid().ToString();
+        }
+
+        this.LoadContent();
+
+        this.Body = @<b id="@this.Uid" class="@this.Class">@this.Text</b>;
+
+        }));
+
+        return this.Body;
+    }
+}

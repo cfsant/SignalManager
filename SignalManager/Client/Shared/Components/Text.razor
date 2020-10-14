@@ -1,0 +1,160 @@
+﻿@inherits Base
+
+@this.RenderBody()
+
+@code {
+    public delegate void OnClickEventDelegate(MouseEventArgs e);
+
+    public new string Content { get; set; }
+
+    [Parameter]
+    public string PContent
+    {
+        get
+        {
+            return this.Content;
+        }
+        set
+        {
+            this.Content = value;
+        }
+    }
+
+    public bool IsLink { get; set; }
+
+    [Parameter]
+    public bool PIsLink
+    {
+        get
+        {
+            return this.IsLink;
+        }
+        set
+        {
+            this.IsLink = value;
+        }
+    }
+
+    public bool Bold { get; set; }
+
+    [Parameter]
+    public bool PBold
+    {
+        get
+        {
+            return this.Bold;
+        }
+        set
+        {
+            this.Bold = value;
+        }
+    }
+
+    public Action<MouseEventArgs> OnClick
+    {
+        get;
+        set;
+    }
+
+    [Parameter]
+    public Action<MouseEventArgs> POnClick
+    {
+        get
+        {
+            return this.OnClick;
+        }
+        set
+        {
+            this.OnClick = value;
+        }
+    }
+
+    public override RenderFragment RenderBody()
+    {
+        this.DoSomething(new Action(() =>
+        {
+            if (string.IsNullOrEmpty(this.Uid) || string.IsNullOrWhiteSpace(this.Uid))
+            {
+                this.Uid = Guid.NewGuid().ToString();
+            }
+
+            this.LoadContent();
+
+            if (this.ItIsLink())
+            {
+                return;
+            }
+
+            if (string.IsNullOrEmpty(this.Class) || string.IsNullOrWhiteSpace(this.Class))
+            {
+                this.Body = @<div id="@this.Uid">
+                                @if(this.Bold)
+                                {
+                                    <b>@this.Content</b>
+                                }
+                                else
+                                {
+                                    @this.Content
+                                }
+                             </div>;
+
+               return;
+            }
+
+            this.Body = @<div id="@this.Uid" class="@this.Class">
+                            @if(this.Bold)
+                            {
+                                <b>@this.Content</b>
+                            }
+                            else
+                            {
+                                @this.Content
+                            }
+                         </div>;
+        }));
+
+        return this.Body;
+    }
+
+    public bool ItIsLink()
+    {
+        if (!this.IsLink)
+        {
+            return false;
+        }
+
+        if (string.IsNullOrEmpty(this.Class) || string.IsNullOrWhiteSpace(this.Class))
+        {
+            this.Body = @<a id="@this.Uid" @onclick="@(new Action<MouseEventArgs>((e) => OnClickEvent(e)))">
+                            @if(this.Bold)
+                            {
+                                <b>@this.Content</b>
+                            }
+                            else
+                            {
+                                @this.Content
+                            }
+                         </a>;
+
+           return true;
+        }
+
+        this.Body = @<a id="@this.Uid" class="@this.Class" @onclick="@(new Action<MouseEventArgs>((e) => OnClickEvent(e)))">
+                         @if(this.Bold)
+                         {
+                             <b>@this.Content</b>
+                         }
+                         else
+                         {
+                             @this.Content
+                         }
+                     </a>;
+
+        return true;
+    }
+
+    private void OnClickEvent(MouseEventArgs e)
+    {
+        this.OnClick?.Invoke(e);
+    }
+}

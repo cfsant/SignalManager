@@ -1,0 +1,68 @@
+﻿@page "/"
+@inherits Page
+
+@this.Body
+
+@code{
+    protected override Task OnInitializedAsync()
+    {
+        base.OnInitializedAsync();
+
+        return Task.Run(async () =>
+        {
+            User = await CookieManager.GetCurrentUser();
+        });
+    }
+
+    protected override void LoadContent()
+    {
+        this.Class = "d-flex flex-fill flex-column";
+
+        this.Content = new Collection<RenderFragment>();
+        this.Content.Add(@<TopNav Parent=this Title="Signal Manager" User="User" OnLogoutCallback="OnLogoutCallback" OnLoginCallback="OnLoginCallback"/>);
+
+        this.LoadContentBody();
+    }
+
+    public void OnLogoutCallback()
+    {
+        User = new User();
+
+        this.ReRenderBody();
+    }
+
+    public void OnLoginCallback()
+    {
+        this.ReRenderBody();
+    }
+
+    public void LoadContentBody()
+    {
+        Console.WriteLine("Load content body...");
+
+        if ((string.IsNullOrEmpty(User.Username) || string.IsNullOrWhiteSpace(User.Username)) || (string.IsNullOrEmpty(User.Password) || string.IsNullOrWhiteSpace(User.Password)))
+        {
+            Console.WriteLine("Undefined.");
+
+            return;
+        }
+
+        switch (User.LevelAccess)
+        {
+            case EnmLevelAccess.DEFAULT:
+                this.Content.Add(@<Client Parent="this" User="User"/>);
+                Console.WriteLine("Client.");
+                break;
+            case EnmLevelAccess.ADMIN:
+                this.Content.Add(@<Admin Parent="this" User="User"/>);
+                Console.WriteLine("Admin.");
+                break;
+        }
+    }
+
+    public override void ReRenderBody()
+    {
+        this.Body = this.RenderBody();
+        StateHasChanged();
+    }
+}

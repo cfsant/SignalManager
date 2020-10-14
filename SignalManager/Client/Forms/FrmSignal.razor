@@ -1,0 +1,470 @@
+﻿@inherits Form<Signal>
+
+@this.Body
+
+@code{
+    public int intDuration
+    {
+        get;
+        set;
+    }
+
+    public int intPair
+    {
+        get;
+        set;
+    }
+
+    public int intDirection
+    {
+        get;
+        set;
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        base.OnInitializedAsync();
+
+        return Task.Run(() => {
+            this.Body = this.RenderBody();
+        });
+    }
+
+    protected override Task OnParametersSetAsync()
+    {
+        return base.OnParametersSetAsync();
+    }
+
+    protected override void LoadContent()
+    {
+        if (string.IsNullOrEmpty(this.Class) || string.IsNullOrWhiteSpace(this.Class))
+        {
+            this.Class = "d-flex flex-column w-100 align-self-center p-md-1 p-lg-1 p-xl-1";
+        }
+
+        this.OnModelLoad(this.Model);
+
+        this.Content = new Collection<RenderFragment>();
+        this.Content.Add(this.GetForm());
+    }
+
+    protected override void OnModelLoad(Signal model)
+    {
+        base.OnModelLoad(model);
+
+        Bag bag = this.DataBag["MODEL_TO_EDIT"];
+        if (bag != null)
+        {
+            this.Model = ((Signal)bag.Value);
+        }
+
+        Console.WriteLine(string.Format("Duration (Carga): {0};", Enum.GetName(typeof(Signal.Durations), this.Model.Duration)));
+
+        this.intDuration = ((int)this.Model.Duration);
+        this.intPair = ((int)this.Model.Pair);
+        this.intDirection = ((int)this.Model.Direction);
+
+        this.DataBag.Remove(bag);
+
+    }
+
+    protected override Task<bool> OnModelPush(Signal model)
+    {
+        return Task.Run<bool>(() => {
+            this.Data.Add(model);
+
+            this.Model = new Signal();
+            this.intDuration = ((int)this.Model.Duration);
+            this.intPair = ((int)this.Model.Pair);
+            this.intDirection = ((int)this.Model.Direction);
+
+            return true;
+        });
+    }
+
+    protected override Task<bool> OnModelValidate(Signal model)
+    {
+        if (model == null || model == default)
+        {
+            Console.WriteLine("Invalid 'MODEL' value.");
+
+            return Task.Run<bool>(() => { return false; });
+        }
+
+        if (model.Date <= DateTime.Now)
+        {
+            Console.WriteLine("Invalid 'DATE' value.");
+
+            return Task.Run<bool>(() => { return false; });
+        }
+
+        if (model.Direction == Signal.Directions.UNDEFINED)
+        {
+            Console.WriteLine("Invalid 'DIRECTION' value.");
+
+            return Task.Run<bool>(() => { return false; });
+        }
+
+        if (model.Pair == Signal.Pairs.UNDEFINED)
+        {
+            Console.WriteLine("Invalid 'PAIR' value.");
+
+            return Task.Run<bool>(() => { return false; });
+        }
+
+        return Task.Run<bool>(() => { return true; });
+    }
+
+    protected override Task OnModelBindings(Signal model)
+    {
+        model.Date = model.Date.ToLocalTime();
+        model.Duration = ((Signal.Durations)this.intDuration);
+        model.Pair = ((Signal.Pairs)this.intPair);
+        model.Direction = ((Signal.Directions)this.intDirection);
+
+        return base.OnModelBindings(model);
+    }
+
+    private RenderFragment GetForm()
+    {
+        Base Container = new Base();
+        Container.Parent = this;
+        Container.Class = "d-flex flex-wrap justify-content-center w-100";
+        Container.Content = new Collection<RenderFragment>() {
+            this.GetDateInputContainer(Container),
+            this.GetDurationInputContainer(Container),
+            this.GetPairInputContainer(Container),
+            this.GetDirectionInputContainer(Container),
+            this.GetAmountInputContainer(Container),
+            this.GetMartinGaleInputContainer(Container),
+            this.GetMartinGaleValueInputContainer(Container),
+            this.GetCommitButtonContainer(Container)
+        };
+
+        //Base Row1 = new Base();
+        //Row1.Parent = Container;
+        //Row1.Class = "d-flex flex-row w-100";
+        //Row1.Content = new Collection<RenderFragment>()
+        //{
+        //    this.GetDateInputContainer(Container),
+        //    this.GetDurationInputContainer(Container),
+        //    this.GetPairInputContainer(Container),
+        //    this.GetDirectionInputContainer(Container)
+        //};
+
+        //Base Row2 = new Base();
+        //Row2.Parent = Container;
+        //Row2.Class = "d-flex flex-row w-100";
+        //Row2.Content = new Collection<RenderFragment>()
+        //{
+        //    this.GetAmountInputContainer(Container),
+        //    this.GetMartinGaleInputContainer(Container),
+        //    this.GetMartinGaleValueInputContainer(Container),
+        //    this.GetCommitButtonContainer(Container)
+        //};
+
+        //Container.Content.Add(Row1.RenderBody());
+        //Container.Content.Add(Row2.RenderBody());
+
+        return Container.RenderBody();
+    }
+
+    private RenderFragment GetDateInputContainer(Base Parent)
+    {
+        Base DateInputContainer = new Base();
+        DateInputContainer.Parent = Parent;
+        DateInputContainer.Class = "d-flex p-2 w-xl-25 w-lg-100 w-md-100 w-sm-100 justify-content-center";
+        DateInputContainer.Content = new Collection<RenderFragment>();
+
+        Base DateInputSubContainer = new Base();
+        DateInputSubContainer.Parent = DateInputSubContainer;
+        DateInputSubContainer.Class = "form-group w-100";
+
+        if (this.Model == null)
+        {
+            DateInputContainer.Content.Add(DateInputSubContainer.RenderBody());
+
+            return DateInputContainer.RenderBody();
+        }
+
+        Collection<RenderFragment> DateInputSubContainerContent = new Collection<RenderFragment>();
+        DateInputSubContainerContent.Add(@<Label Parent="@DateInputSubContainer" For="dateInput" Text="Data:"/>);
+        DateInputSubContainerContent.Add(@<MatDatePicker Outlined="true" TValue="DateTime" Enable24hours="true" EnableSeconds="true" Format="dd/MM/yyyy HH:mm:ss" EnableTime="true" @bind-Value="@this.Model.Date" Class="w-100" Id="dateInput"/>);
+
+        DateInputSubContainer.Content = DateInputSubContainerContent;
+
+        DateInputContainer.Content.Add(DateInputSubContainer.RenderBody());
+
+        return DateInputContainer.RenderBody();
+    }
+
+    private RenderFragment GetDurationInputContainer(Base Parent)
+    {
+        Console.WriteLine(string.Format("Duration (Geração): {0} — {1};", Enum.GetName(typeof(Signal.Durations), this.Model.Duration), this.intDuration));
+
+        Base DurationInputContainer = new Base();
+        DurationInputContainer.Parent = Parent;
+        DurationInputContainer.Class = "d-flex p-2 w-xl-25 w-lg-100 w-md-100 w-sm-100 justify-content-center";
+        DurationInputContainer.Content = new Collection<RenderFragment>();
+
+        Base DurationInputSubContainer = new Base();
+        DurationInputSubContainer.Parent = DurationInputContainer;
+        DurationInputSubContainer.Class = "form-group w-100";
+
+        if (this.Model == null)
+        {
+            DurationInputContainer.Content.Add(DurationInputSubContainer.RenderBody());
+
+            return DurationInputContainer.RenderBody();
+        }
+
+        Collection<RenderFragment> IntervalInputSubContainerContent = new Collection<RenderFragment>();
+        IntervalInputSubContainerContent.Add(@<Label Parent="@DurationInputSubContainer" Class="w-100" For="durationInput" Text="Duração:"/>);
+        IntervalInputSubContainerContent.Add(this.GetDurationInputField());
+
+        DurationInputSubContainer.Content = IntervalInputSubContainerContent;
+
+        DurationInputContainer.Content.Add(DurationInputSubContainer.RenderBody());
+
+        return DurationInputContainer.RenderBody();
+    }
+
+    private RenderFragment GetDurationInputField()
+    {
+        return @<MatSelect Outlined="true" @bind-Value="@this.intDuration" Class="w-100" Id="durationInput">
+                    @foreach (RenderFragment option in this.GetDurationInputFieldOptions())
+                    {
+                        @option
+                    }
+                </MatSelect>;
+    }
+
+    private Collection<RenderFragment> GetDurationInputFieldOptions()
+    {
+        Collection<RenderFragment> options = new Collection<RenderFragment>();
+
+        foreach (Signal.Durations duration in Enum.GetValues(typeof(Signal.Durations)))
+        {
+            options.Add(@<MatOption Value=@((int)duration) Class="w-100">@((int)duration)</MatOption>);
+        }
+
+        return options;
+    }
+
+    private RenderFragment GetAmountInputContainer(Base Parent)
+    {
+        Base AmountInputContainer = new Base();
+        AmountInputContainer.Parent = Parent;
+        AmountInputContainer.Class = "d-flex p-2 w-xl-25 w-lg-100 w-md-100 w-sm-100 justify-content-center";
+        AmountInputContainer.Content = new Collection<RenderFragment>();
+
+        Base AmountInputSubContainer = new Base();
+        AmountInputSubContainer.Parent = AmountInputContainer;
+        AmountInputSubContainer.Class = "form-group w-100";
+
+        if (this.Model == null)
+        {
+            AmountInputContainer.Content.Add(AmountInputSubContainer.RenderBody());
+
+            return AmountInputContainer.RenderBody();
+        }
+
+        Collection<RenderFragment> AmountInputSubContainerContent = new Collection<RenderFragment>();
+        AmountInputSubContainerContent.Add(@<Label Parent="@AmountInputSubContainer" For="amountInput" Text="Valor:"/>);
+        AmountInputSubContainerContent.Add(@<MatNumericUpDownField @bind-Value="@this.Model.Amount" Outlined="true" FieldType="MatNumericUpDownFieldType.Currency" DecimalPlaces=2 Class="w-100" Id="amountInput" />);
+
+        AmountInputSubContainer.Content = AmountInputSubContainerContent;
+
+        AmountInputContainer.Content.Add(AmountInputSubContainer.RenderBody());
+
+        return AmountInputContainer.RenderBody();
+    }
+
+    private RenderFragment GetMartinGaleInputContainer(Base Parent)
+    {
+        Base MartinGaleInputContainer = new Base();
+        MartinGaleInputContainer.Parent = Parent;
+        MartinGaleInputContainer.Class = "d-flex p-2 w-xl-25 w-lg-100 w-md-100 w-sm-100 justify-content-center";
+        MartinGaleInputContainer.Content = new Collection<RenderFragment>();
+
+        Base MartinGaleSubContainer = new Base();
+        MartinGaleSubContainer.Parent = MartinGaleInputContainer;
+        MartinGaleSubContainer.Class = "form-group w-100";
+
+        if (this.Model == null)
+        {
+            MartinGaleInputContainer.Content.Add(MartinGaleSubContainer.RenderBody());
+
+            return MartinGaleInputContainer.RenderBody();
+        }
+
+        Collection<RenderFragment> MartinGaleInputSubContainerContent = new Collection<RenderFragment>();
+        MartinGaleInputSubContainerContent.Add(@<Label Parent="@MartinGaleSubContainer" For="martingaleInput" Text="Martingale:"/>);
+        MartinGaleInputSubContainerContent.Add(@<MatNumericUpDownField @bind-Value="@this.Model.Martingale" Outlined="true" FieldType="MatNumericUpDownFieldType.Numeric" DecimalPlaces=2 Class="w-100" Id="martingaleInput" />);
+
+        MartinGaleSubContainer.Content = MartinGaleInputSubContainerContent;
+
+        MartinGaleInputContainer.Content.Add(MartinGaleSubContainer.RenderBody());
+
+        return MartinGaleInputContainer.RenderBody();
+    }
+
+    private RenderFragment GetMartinGaleValueInputContainer(Base Parent)
+    {
+        Base MartinGaleValueInputContainer = new Base();
+        MartinGaleValueInputContainer.Parent = Parent;
+        MartinGaleValueInputContainer.Class = "d-flex p-2 w-xl-25 w-lg-100 w-md-100 w-sm-100 justify-content-center";
+        MartinGaleValueInputContainer.Content = new Collection<RenderFragment>();
+
+        Base MartinGaleValueInputSubContainer = new Base();
+        MartinGaleValueInputSubContainer.Parent = MartinGaleValueInputContainer;
+        MartinGaleValueInputSubContainer.Class = "form-group w-100";
+
+        if (this.Model == null)
+        {
+            MartinGaleValueInputContainer.Content.Add(MartinGaleValueInputSubContainer.RenderBody());
+
+            return MartinGaleValueInputContainer.RenderBody();
+        }
+
+        Collection<RenderFragment> AmountInputSubContainerContent = new Collection<RenderFragment>();
+        AmountInputSubContainerContent.Add(@<Label Parent="@MartinGaleValueInputSubContainer" For="martingaleValueInput" Text="Martingale(R$):"/>);
+        AmountInputSubContainerContent.Add(@<MatNumericUpDownField @bind-Value="@this.Model.MartingaleValue" Outlined="true" FieldType="MatNumericUpDownFieldType.Currency" DecimalPlaces=2 Class="w-100" Id="martingaleValueInput" />);
+
+        MartinGaleValueInputSubContainer.Content = AmountInputSubContainerContent;
+
+        MartinGaleValueInputContainer.Content.Add(MartinGaleValueInputSubContainer.RenderBody());
+
+        return MartinGaleValueInputContainer.RenderBody();
+    }
+
+    private RenderFragment GetPairInputContainer(Base Parent)
+    {
+        Base PairInputContainer = new Base();
+        PairInputContainer.Parent = Parent;
+        PairInputContainer.Class = "d-flex p-2 w-xl-25 w-lg-100 w-md-100 w-sm-100 justify-content-center";
+        PairInputContainer.Content = new Collection<RenderFragment>();
+
+        Base PairInputSubContainer = new Base();
+        PairInputSubContainer.Parent = PairInputContainer;
+        PairInputSubContainer.Class = "form-group w-100";
+
+        if (this.Model == null)
+        {
+            PairInputContainer.Content.Add(PairInputSubContainer.RenderBody());
+
+            return PairInputContainer.RenderBody();
+        }
+
+        Collection<RenderFragment> PairInputSubContainerContent = new Collection<RenderFragment>();
+        PairInputSubContainerContent.Add(@<Label Parent="@PairInputSubContainer" Class="w-100" For="pairInput" Text="Par:"/>);
+        PairInputSubContainerContent.Add(this.GetPairInputField());
+
+        PairInputSubContainer.Content = PairInputSubContainerContent;
+
+        PairInputContainer.Content.Add(PairInputSubContainer.RenderBody());
+
+        return PairInputContainer.RenderBody();
+    }
+
+    private RenderFragment GetPairInputField()
+    {
+        return @<MatSelect Outlined="true" @bind-Value="@this.intPair" Class="w-100" Id="pairInput">
+                    @foreach (RenderFragment option in this.GetPairInputFieldOptions())
+                    {
+                        @option
+                    }
+                </MatSelect>;
+    }
+
+    private Collection<RenderFragment> GetPairInputFieldOptions()
+    {
+        Collection<RenderFragment> options = new Collection<RenderFragment>();
+
+        foreach (Signal.Pairs goal in Enum.GetValues(typeof(Signal.Pairs)))
+        {
+            options.Add(@<MatOption Value=@((int)goal) Class="w-100">@Enum.GetName(goal.GetType(), goal)</MatOption>);
+        }
+
+        return options;
+    }
+
+    private RenderFragment GetDirectionInputContainer(Base Parent)
+    {
+        Base DirectionInputContainer = new Base();
+        DirectionInputContainer.Parent = Parent;
+        DirectionInputContainer.Class = "d-flex p-2 w-xl-25 w-lg-100 w-md-100 w-sm-100 justify-content-center";
+        DirectionInputContainer.Content = new Collection<RenderFragment>();
+
+        Base DirectionInputSubContainer = new Base();
+        DirectionInputSubContainer.Parent = DirectionInputContainer;
+        DirectionInputSubContainer.Class = "form-group w-100";
+
+        if (this.Model == null)
+        {
+            DirectionInputContainer.Content.Add(DirectionInputSubContainer.RenderBody());
+
+            return DirectionInputContainer.RenderBody();
+        }
+
+        Collection<RenderFragment> DirectionInputSubContainerContent = new Collection<RenderFragment>();
+        DirectionInputSubContainerContent.Add(@<Label Parent="@DirectionInputSubContainer" Class="w-100" For="directionInput" Text="Direção:"/>);
+        DirectionInputSubContainerContent.Add(this.GetDirectionInputField());
+
+        DirectionInputSubContainer.Content = DirectionInputSubContainerContent;
+
+        DirectionInputContainer.Content.Add(DirectionInputSubContainer.RenderBody());
+
+        return DirectionInputContainer.RenderBody();
+    }
+
+    private RenderFragment GetDirectionInputField()
+    {
+        return @<MatSelect Outlined="true" @bind-Value="@this.intDirection" Class="w-100" Id="directionInput">
+                    @foreach (RenderFragment option in this.GetDirectionInputFieldOptions())
+                    {
+                        @option
+                    }
+                </MatSelect>;
+    }
+
+    private Collection<RenderFragment> GetDirectionInputFieldOptions()
+    {
+        Collection<RenderFragment> options = new Collection<RenderFragment>();
+
+        foreach (Signal.Directions direction in Enum.GetValues(typeof(Signal.Directions)))
+        {
+            options.Add(@<MatOption Value=@((int)direction)>@Enum.GetName(direction.GetType(), direction)</MatOption>);
+        }
+
+        return options;
+    }
+
+    private RenderFragment GetCommitButtonContainer(Base Parent)
+    {
+        Base DateInputContainer = new Base();
+        DateInputContainer.Parent = Parent;
+        DateInputContainer.Class = "d-flex p-2 pt-xl-3 w-xl-25 w-lg-100 w-md-100 w-sm-100 justify-content-end align-items-center";
+        DateInputContainer.Style = "min-height:56px";
+        DateInputContainer.Content = new Collection<RenderFragment>()
+        {
+            this.GetButton()
+        };
+
+        return DateInputContainer.RenderBody();
+    }
+
+    private RenderFragment GetButton()
+    {
+        return @<button id="@Guid.NewGuid().ToString()" class="btn btn-dark align-items-center pt-3 pb-3" type="button" style="height: 56px; width: 56px;" @onclick="OnCommit">
+                    <MatIcon Icon="@MatIconNames.Add_circle" Class="w-100 h-100" />
+                </button>;
+    }
+
+    private void OnCommit()
+    {
+        Task.Run(async () => {
+            await this.OnFormSubmit(this.Model);
+        });
+    }
+}

@@ -1,0 +1,153 @@
+﻿@inherits Modal<User>
+
+@this.Body
+
+@code{
+
+    public int intPair
+    {
+        get;
+        set;
+    }
+
+    public int intDirection
+    {
+        get;
+        set;
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        base.OnInitializedAsync();
+
+        return Task.Run(() => {
+            this.Body = this.RenderBody();
+        });
+    }
+
+    protected override void LoadContent()
+    {
+        if (string.IsNullOrEmpty(this.Class) || string.IsNullOrWhiteSpace(this.Class))
+        {
+            this.Class = "d-flex flex-column";
+        }
+
+        this.OnModelLoad();
+
+        this.Content = new Collection<RenderFragment>() {
+            this.GetUserInputContainer(this),
+            this.GetPasswordInputContainer(this),
+            this.GetCommitButtonContainer(this)
+        };
+    }
+
+    protected override Task<bool> OnModelPush()
+    {
+        return base.OnModelPush();
+    }
+
+    protected override void OnModelLoad()
+    {
+        base.OnModelLoad();
+    }
+
+    protected override Task<bool> OnModelValidate()
+    {
+        if (this.Model == null || this.Model == default)
+        {
+            Console.WriteLine("Invalid 'MODEL' value.");
+
+            return Task.Run<bool>(() => { return false; });
+        }
+
+        if (string.IsNullOrEmpty(this.Model.Username) || string.IsNullOrWhiteSpace(this.Model.Username))
+        {
+            Console.WriteLine("Invalid 'USERNAME' value.");
+
+            return Task.Run<bool>(() => { return false; });
+        }
+
+        if (string.IsNullOrEmpty(this.Model.Password) || string.IsNullOrWhiteSpace(this.Model.Password))
+        {
+            Console.WriteLine("Invalid 'PASSWORD' value.");
+
+            return Task.Run<bool>(() => { return false; });
+        }
+
+        return Task.Run<bool>(() => { return true; });
+    }
+
+    protected override Task OnModelBindings()
+    {
+        return base.OnModelBindings();
+    }
+
+    private RenderFragment GetForm()
+    {
+        Base Container = new Base();
+        Container.Parent = this;
+        Container.Class = "form-row justify-content-center w-100";
+
+        Container.Content = new Collection<RenderFragment>(){
+            this.GetUserInputContainer(Container),
+            this.GetPasswordInputContainer(Container),
+            this.GetCommitButtonContainer(Container)
+        };
+
+        return Container.RenderBody();
+    }
+
+    private RenderFragment GetUserInputContainer(Base Parent)
+    {
+        Base UserInputContainer = new Base();
+        UserInputContainer.Parent = Parent;
+        UserInputContainer.Class = "form-group p-2 w-100";
+
+        if (this.Model == null)
+        {
+            return UserInputContainer.RenderBody();
+        }
+
+        Collection<RenderFragment>UserInputContainerContent = new Collection<RenderFragment>();
+        UserInputContainerContent.Add(@<MatTextField Outlined="true" TValue="string" @bind-Value="@this.Model.Username" Class="w-100" Id="userInput" PlaceHolder="Username"/>);
+
+        UserInputContainer.Content = UserInputContainerContent;
+
+        return UserInputContainer.RenderBody();
+    }
+
+    private RenderFragment GetPasswordInputContainer(Base Parent)
+    {
+        Base UserInputContainer = new Base();
+        UserInputContainer.Parent = Parent;
+        UserInputContainer.Class = "form-group p-2 w-100";
+
+        if (this.Model == null)
+        {
+            return UserInputContainer.RenderBody();
+        }
+
+        Collection<RenderFragment>UserInputContainerContent = new Collection<RenderFragment>();
+        UserInputContainerContent.Add(@<MatTextField Outlined="true" TValue="string" @bind-Value="@this.Model.Password" Class="w-100" Id="passInput" Type="password" PlaceHolder="Password" />);
+
+        UserInputContainer.Content = UserInputContainerContent;
+
+        return UserInputContainer.RenderBody();
+    }
+
+    private RenderFragment GetCommitButtonContainer(Base Parent)
+    {
+        Base DateInputContainer = new Base();
+        DateInputContainer.Parent = Parent;
+        DateInputContainer.Class = "form-group d-flex p-2 w-100 align-items-center";
+        DateInputContainer.Content = new Collection<RenderFragment>();
+        DateInputContainer.Content.Add(this.GetButton());
+
+        return DateInputContainer.RenderBody();
+    }
+
+    private RenderFragment GetButton()
+    {
+        return @<button id="@Guid.NewGuid().ToString()" class="btn btn-dark w-100" type="button" @onclick="OnModelUpdate">Login</button>;
+    }
+}

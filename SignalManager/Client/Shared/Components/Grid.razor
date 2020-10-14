@@ -1,0 +1,94 @@
+﻿@typeparam TModel
+@inherits Base
+
+@code {
+    [Inject]
+    public TModel Model
+    {
+        get;
+        set;
+    }
+
+    [Inject]
+    public DataControler<TModel> Data
+    {
+        get;
+        set;
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        return base.OnInitializedAsync();
+    }
+
+    protected override void LoadContent()
+    {
+        this.Content = this.GetBase();
+    }
+
+    public virtual Collection<RenderFragment> GetBase()
+    {
+        Collection<RenderFragment> Content = new Collection<RenderFragment>();
+        this.Content.Add(this.GetHeader(this));
+        foreach (var child in this.GetBase())
+        {
+            this.Content.Add(child);
+        }
+
+        return Content;
+    }
+
+    public override RenderFragment RenderBody()
+    {
+        this.DoSomething(new Action(() =>
+        {
+            if (string.IsNullOrEmpty(this.Uid) || string.IsNullOrWhiteSpace(this.Uid))
+            {
+                this.Uid = Guid.NewGuid().ToString();
+            }
+
+            this.LoadContent();
+
+            if (string.IsNullOrEmpty(this.Class) || string.IsNullOrWhiteSpace(this.Class))
+            {
+                this.Body = @<div id="@this.Uid">
+                                 @foreach (RenderFragment child in this.Content)
+                                 {
+                                     @child
+                                 }
+                             </div>;
+
+                return;
+            }
+
+            this.Body = @<div id="@this.Uid" class="@this.Class">
+                             @foreach (RenderFragment child in this.Content)
+                             {
+                                 @child
+                             }
+                         </div>;
+        }));
+
+        return this.Body;
+    }
+
+    public virtual RenderFragment GetHeader(Base Parent)
+    {
+        return new Base() { Parent = Parent, Content = this.GetHeaderColumns()}.RenderBody();
+    }
+
+    public virtual Collection<RenderFragment> GetHeaderColumns()
+    {
+        return new Collection<RenderFragment>();
+    }
+
+    public virtual Collection<RenderFragment> GetBody(Base Parent)
+    {
+        return null;
+    }
+
+    public virtual Collection<RenderFragment> GetBodyColumns()
+    {
+        return new Collection<RenderFragment>();
+    }
+}
