@@ -9,6 +9,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalManager.Client", "Sig
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalManager.Shared", "SignalManager\Shared\SignalManager.Shared.csproj", "{E8C8376F-8DAA-4395-8951-73E6DDF64FE7}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalManager.Model", "IqTask\Model\SignalManager.Model.csproj", "{A92F1D17-65E1-4342-B36E-A6BC44D8BC94}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cryptography", "Crypto\Cryptography\Cryptography.csproj", "{9821413B-ED4E-44F7-B3BE-D97A2D80AFAB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +31,14 @@ Global
 		{E8C8376F-8DAA-4395-8951-73E6DDF64FE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E8C8376F-8DAA-4395-8951-73E6DDF64FE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E8C8376F-8DAA-4395-8951-73E6DDF64FE7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A92F1D17-65E1-4342-B36E-A6BC44D8BC94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A92F1D17-65E1-4342-B36E-A6BC44D8BC94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A92F1D17-65E1-4342-B36E-A6BC44D8BC94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A92F1D17-65E1-4342-B36E-A6BC44D8BC94}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9821413B-ED4E-44F7-B3BE-D97A2D80AFAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9821413B-ED4E-44F7-B3BE-D97A2D80AFAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9821413B-ED4E-44F7-B3BE-D97A2D80AFAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9821413B-ED4E-44F7-B3BE-D97A2D80AFAB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
