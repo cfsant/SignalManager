@@ -31,22 +31,22 @@
         this.Class = "d-flex flex-row w-100 align-self-center mt-xl-2 mt-lg-2 p-2";
 
         return Task.Run(() => {
-            if (this.Data == null || this.Data.Count < 1)
-            {
-                this.Data = new DataControler<Signal>()
-                {
-                    new Signal()
-                    {
-                        Date = DateTime.Now.AddDays(1),
-                        Duration = Signal.Durations.CINCO,
-                        Pair = Signal.Pairs.AUDCAD,
-                        Direction = Signal.Directions.CALL,
-                        Amount = 10,
-                        Martingale = 1,
-                        MartingaleValue = 2
-                    }
-                };
-            }
+            //if (this.Data == null || this.Data.Count < 1)
+            //{
+            //    this.Data = new DataControler<Signal>()
+            //    {
+            //        new Signal()
+            //        {
+            //            Date = DateTime.Now.AddDays(1),
+            //            Duration = Signal.Durations.CINCO,
+            //            Pair = Signal.Pairs.AUDCAD,
+            //            Direction = Signal.Directions.CALL,
+            //            Amount = 10,
+            //            Martingale = 1,
+            //            MartingaleValue = 2
+            //        }
+            //    };
+            //}
 
             this.Body = this.RenderBody();
         });
