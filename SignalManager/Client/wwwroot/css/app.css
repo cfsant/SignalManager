@@ -30,6 +30,12 @@ small{
     margin: 0 auto;
 }
 
+.col-0-5 {
+    -ms-flex: 0 0 4.1666665%;
+    flex: 0 0 4.1666665;
+    max-width: 4.1666665%
+}
+
 .btn-sm-link {
 }
 
@@ -525,7 +531,7 @@ small{
 /* Small devices (portrait tablets and large phones, 384-576px and up) */
 @media only screen and (min-width: 356px) and ( max-width: 576px) {
     .min-sm-h-180 {
-        min-height:180px;
+        min-height:220px !important;
     }
 
     .btn-sm-link {
@@ -595,6 +601,10 @@ small{
 
     pl-sm-4 {
         padding-left: 1.5rem !important
+    }
+
+    ml-sm-4 {
+        margin-left: 1.5rem !important
     }
 
     pr-sm-1 {
@@ -814,6 +824,11 @@ small{
 
 /* Medium devices (landscape tablets, 577-767px and up) */
 @media only screen and (min-width: 577px) and ( max-width: 800px) {
+    .d-md-inline-flex {
+        display: -ms-inline-flexbox !important;
+        display: inline-flex !important
+    }
+
     .btn-md-link {
         font-weight: 400;
         color: #007bff;

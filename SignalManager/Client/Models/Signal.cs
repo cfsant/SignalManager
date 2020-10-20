@@ -71,7 +71,6 @@ namespace SignalManager.Client.Models
 
         public enum Durations
         {
-            UM = 1,
             DOIS = 2,
             TRÊS = 3,
             QUATRO = 4,
@@ -160,7 +159,7 @@ namespace SignalManager.Client.Models
         {
             this.Uid = Guid.NewGuid().ToString();
             this.Date = DateTime.Now;
-            this.Duration = Durations.UM;
+            this.Duration = Durations.DOIS;
             this.Pair = Pairs.UNDEFINED;
             this.Direction = Directions.UNDEFINED;
             this.Editing = false;
