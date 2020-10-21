@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.JSInterop;
+using Model;
 using SignalManager.Client.Models;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace SignalManager.Client.Controlers
         private static IJSRuntime _IJSRuntime { get; set; }
 
         [Inject]
-        public static User User { get; set; }
+        public static UserDomain User { get; set; }
 
         [Inject]
         private static HttpClient _Http { get; set; }
@@ -24,20 +25,20 @@ namespace SignalManager.Client.Controlers
         {
             _IJSRuntime = IJSRuntime;
             _Http = Http;
-            User = new User();
+            User = new UserDomain();
         }
 
-        public async Task<User> GetCurrentUser()
+        public async Task<UserDomain> GetCurrentUser()
         {
-            User.Username = await CookieManager.GetValue("sigmgmt_username");
+            User.Email = await CookieManager.GetValue("sigmgmt_username");
             User.Password = await CookieManager.GetValue("sigmgmt_password");
 
             return User;
         }
 
-        public async Task SetCurrentUser(User user)
+        public async Task SetCurrentUser(UserDomain user)
         {
-            await CookieManager.SetValue("sigmgmt_username", user.Username, 365);
+            await CookieManager.SetValue("sigmgmt_username", user.Email, 365);
             await CookieManager.SetValue("sigmgmt_password", user.Password, 365);
         }
 

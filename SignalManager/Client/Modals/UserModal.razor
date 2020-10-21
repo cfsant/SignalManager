@@ -1,6 +1,7 @@
-﻿@inherits Modal<User>
+﻿@inherits Modal<UserDomain>
 
 @this.Body
+@using Model;
 
 @code{
 
@@ -20,7 +21,8 @@
     {
         base.OnInitializedAsync();
 
-        return Task.Run(() => {
+        return Task.Run(() =>
+        {
             this.Body = this.RenderBody();
         });
     }
@@ -41,9 +43,10 @@
         };
     }
 
-    protected override Task<bool> OnModelPush()
+    protected async override Task<bool> OnModelPush()
     {
-        return base.OnModelPush();
+        var lstUser = await this.PostWithTokenAsync<UserDomain>("User/Teste", this.Model);
+        return await base.OnModelPush();
     }
 
     protected override void OnModelLoad()
@@ -56,21 +59,19 @@
         if (this.Model == null || this.Model == default)
         {
             Console.WriteLine("Invalid 'MODEL' value.");
-
             return Task.Run<bool>(() => { return false; });
         }
 
-        if (string.IsNullOrEmpty(this.Model.Username) || string.IsNullOrWhiteSpace(this.Model.Username))
+        if (string.IsNullOrEmpty(this.Model.Email) || string.IsNullOrWhiteSpace(this.Model.Email))
         {
-            Console.WriteLine("Invalid 'USERNAME' value.");
 
+            Toaster.Add("Invalid 'USERNAME' value.", MatToastType.Danger);
             return Task.Run<bool>(() => { return false; });
         }
 
         if (string.IsNullOrEmpty(this.Model.Password) || string.IsNullOrWhiteSpace(this.Model.Password))
         {
-            Console.WriteLine("Invalid 'PASSWORD' value.");
-
+            Toaster.Add("Invalid 'USERNAME' value.", MatToastType.Danger);
             return Task.Run<bool>(() => { return false; });
         }
 
@@ -108,46 +109,46 @@
             return UserInputContainer.RenderBody();
         }
 
-        Collection<RenderFragment>UserInputContainerContent = new Collection<RenderFragment>();
-        UserInputContainerContent.Add(@<MatTextField Outlined="true" TValue="string" @bind-Value="@this.Model.Username" Class="w-100" Id="userInput" PlaceHolder="Username"/>);
+        Collection<RenderFragment> UserInputContainerContent = new Collection<RenderFragment>();
+        UserInputContainerContent.Add(@<MatTextField Outlined="true" TValue="string" @bind-Value="@this.Model.Email" Class="w-100" Id="userInput" PlaceHolder="Username" />);
 
-        UserInputContainer.Content = UserInputContainerContent;
+UserInputContainer.Content = UserInputContainerContent;
 
-        return UserInputContainer.RenderBody();
-    }
+return UserInputContainer.RenderBody();
+}
 
-    private RenderFragment GetPasswordInputContainer(Base Parent)
-    {
-        Base UserInputContainer = new Base();
-        UserInputContainer.Parent = Parent;
-        UserInputContainer.Class = "form-group p-2 w-100";
+private RenderFragment GetPasswordInputContainer(Base Parent)
+{
+Base UserInputContainer = new Base();
+UserInputContainer.Parent = Parent;
+UserInputContainer.Class = "form-group p-2 w-100";
 
-        if (this.Model == null)
-        {
-            return UserInputContainer.RenderBody();
-        }
+if (this.Model == null)
+{
+return UserInputContainer.RenderBody();
+}
 
-        Collection<RenderFragment>UserInputContainerContent = new Collection<RenderFragment>();
-        UserInputContainerContent.Add(@<MatTextField Outlined="true" TValue="string" @bind-Value="@this.Model.Password" Class="w-100" Id="passInput" Type="password" PlaceHolder="Password" />);
+Collection<RenderFragment> UserInputContainerContent = new Collection<RenderFragment>();
+UserInputContainerContent.Add(@<MatTextField Outlined="true" TValue="string" @bind-Value="@this.Model.Password" Class="w-100" Id="passInput" Type="password" PlaceHolder="Password" />);
 
-        UserInputContainer.Content = UserInputContainerContent;
+UserInputContainer.Content = UserInputContainerContent;
 
-        return UserInputContainer.RenderBody();
-    }
+return UserInputContainer.RenderBody();
+}
 
-    private RenderFragment GetCommitButtonContainer(Base Parent)
-    {
-        Base DateInputContainer = new Base();
-        DateInputContainer.Parent = Parent;
-        DateInputContainer.Class = "form-group d-flex p-2 w-100 align-items-center";
-        DateInputContainer.Content = new Collection<RenderFragment>();
-        DateInputContainer.Content.Add(this.GetButton());
+private RenderFragment GetCommitButtonContainer(Base Parent)
+{
+Base DateInputContainer = new Base();
+DateInputContainer.Parent = Parent;
+DateInputContainer.Class = "form-group d-flex p-2 w-100 align-items-center";
+DateInputContainer.Content = new Collection<RenderFragment>();
+DateInputContainer.Content.Add(this.GetButton());
 
-        return DateInputContainer.RenderBody();
-    }
+return DateInputContainer.RenderBody();
+}
 
-    private RenderFragment GetButton()
-    {
-        return @<button id="@Guid.NewGuid().ToString()" class="btn btn-dark w-100" type="button" @onclick="OnModelUpdate">Login</button>;
-    }
+private RenderFragment GetButton()
+{
+return @<button id="@Guid.NewGuid().ToString()" class="btn btn-dark w-100" type="button" @onclick="OnModelUpdate">Login</button>;
+}
 }

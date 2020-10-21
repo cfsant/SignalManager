@@ -1,11 +1,12 @@
 ﻿@inherits Nav
 @inject CookieManager CookieManager
+@using Model;
 
 @this.Body
 
 @code {
     [Parameter]
-    public User User
+    public UserDomain User
     {
         get;
         set;
@@ -51,7 +52,7 @@
 
     private RenderFragment GetActionButton()
     {
-        if ((string.IsNullOrEmpty(User.Username) || string.IsNullOrWhiteSpace(User.Username)) || (string.IsNullOrEmpty(User.Password) || string.IsNullOrWhiteSpace(User.Password)))
+        if ((string.IsNullOrEmpty(User.Email) || string.IsNullOrWhiteSpace(User.Email)) || (string.IsNullOrEmpty(User.Password) || string.IsNullOrWhiteSpace(User.Password)))
         {
             return @<Button Parent="this" Class="btn btn-dark" Text="Login" OnClick=@(new Action(() => { OnLogin(); })) />;
         }
@@ -66,7 +67,7 @@
         StateHasChanged();
     }
 
-    private async Task OnModelUpdateCallback(User user)
+    private async Task OnModelUpdateCallback(UserDomain user)
     {
         this.ShowModal = !this.ShowModal;
 
@@ -81,19 +82,19 @@
 
     private async Task OnLogout()
     {
-        User = new User();
+        User = new UserDomain();
 
         this.ReRenderBody();
 
-        await CookieManager.SetCurrentUser(new User());
+        await CookieManager.SetCurrentUser(new UserDomain());
 
         OnLogoutCallback?.Invoke();
     }
 
-    private RenderFragment GetModal(Base Parent, User model)
+    private RenderFragment GetModal(Base Parent, UserDomain model)
     {
         return @<MatDialog @bind-IsOpen="this.ShowModal">
-                    <UserModal Parent="Parent" Model="User" OnModelUpdateCallback=@(new Action<User>(async (u) => await OnModelUpdateCallback(u)))/>
+                    <UserModal Parent="Parent" Model="User" OnModelUpdateCallback=@(new Action<UserDomain>(async (u) => await OnModelUpdateCallback(u)))/>
                 </MatDialog>;
     }
 }

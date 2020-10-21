@@ -1,5 +1,5 @@
 ﻿@inherits Grid<Signal>
-@inject User User 
+@inject UserDomain User 
 
 @this.Body
 
@@ -60,10 +60,10 @@
         BaseContainer.Content = new Collection<RenderFragment>();
         BaseContainer.Content.Add(this.GetHeader(BaseContainer));
 
-        if (User.LevelAccess == EnmLevelAccess.DEFAULT)
-        {
-            this.Create();
-        }
+        //if (User.LevelAccess == EnmLevelAccess.DEFAULT)
+        //{
+        //this.Create();
+        //}
 
         if (this.Data == null || this.Data.Count < 1)
         {

@@ -26,7 +26,7 @@
 
     public void OnLogoutCallback()
     {
-        User = new User();
+        User = new UserDomain();
 
         this.ReRenderBody();
     }
@@ -40,24 +40,24 @@
     {
         Console.WriteLine("Load content body...");
 
-        if ((string.IsNullOrEmpty(User.Username) || string.IsNullOrWhiteSpace(User.Username)) || (string.IsNullOrEmpty(User.Password) || string.IsNullOrWhiteSpace(User.Password)))
+        if ((string.IsNullOrEmpty(User.Email) || string.IsNullOrWhiteSpace(User.Email)) || (string.IsNullOrEmpty(User.Password) || string.IsNullOrWhiteSpace(User.Password)))
         {
             Console.WriteLine("Undefined.");
 
             return;
         }
 
-        switch (User.LevelAccess)
+        @*switch (User.LevelAccess)
         {
             case EnmLevelAccess.DEFAULT:
                 this.Content.Add(@<Client Parent="this" User="User"/>);
                 Console.WriteLine("Client.");
-                break;
-            case EnmLevelAccess.ADMIN:
-                this.Content.Add(@<Admin Parent="this" User="User"/>);
-                Console.WriteLine("Admin.");
-                break;
-        }
+                break;*@
+        //case EnmLevelAccess.ADMIN:
+        this.Content.Add(@<Admin Parent="this" User="User"/>);
+        Console.WriteLine("Admin.");
+        //        break;
+        //}
     }
 
     public override void ReRenderBody()

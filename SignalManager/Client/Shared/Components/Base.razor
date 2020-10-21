@@ -1,4 +1,6 @@
 ﻿@this.Body
+@using Model.Base;
+@using Model.Base.Middleware;
 
 @code {
     [Inject]
@@ -31,6 +33,13 @@
         set;
     }
 
+    [Inject]
+    public IMatToaster Toaster
+    {
+        get;
+        set;
+    }
+
     [Parameter]
     public string Style
     {
@@ -51,6 +60,13 @@
     }
 
     protected string Exception
+    {
+        get;
+        set;
+    }
+
+    [Inject]
+    public HttpClient Http
     {
         get;
         set;
@@ -259,6 +275,45 @@
                 }
             }
         });
+    }
+
+    protected async Task<List<T>> PostWithTokenAsync<T>(string route, T model = default, bool toastNotification = false) where T : IBaseDomain<T>
+    {
+        MiddlewareDomain<T> middleware = new MiddlewareDomain<T>();
+        try
+        {
+            if (model != null) middleware = await Http.PostJsonAsync<MiddlewareDomain<T>>(route, model);
+            else middleware = await Http.PostJsonAsync<MiddlewareDomain<T>>(route, CookieManager.User.Password);
+
+            if (!string.IsNullOrEmpty(middleware.Exception) || !string.IsNullOrWhiteSpace(middleware.Exception))
+            {
+                if (toastNotification) Toaster.Add(middleware.Exception, MatToastType.Danger);
+                Console.WriteLine(middleware.Exception);
+                middleware.Objs = new List<T>() { model };
+            }
+            else if (toastNotification)
+            {
+                Toaster.Add("Sucesso", MatToastType.Success);
+                Console.WriteLine("Sucesso");
+            }
+
+            CookieManager.User.Password = middleware.TokenAccess;
+            //await CookieManager.SetValue();
+
+            return middleware.Objs;
+        }
+        catch (Exception ex)
+        {
+            if (toastNotification) Toaster.Add(ex.Message, MatToastType.Danger);
+            Console.WriteLine(ex.Message);
+            return new List<T>() { model };
+        }
+    }
+
+    protected T GetModel<T>(List<T> lst) where T : IBaseDomain<T>
+    {
+        if (lst == null || lst.Count <= 0) return Activator.CreateInstance<T>();
+        else return lst.First();
     }
 
     public virtual void ReRenderBody()
