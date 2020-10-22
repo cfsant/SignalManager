@@ -19,16 +19,6 @@
 
     protected override Task OnInitializedAsync()
     {
-        // ---
-        // Carregar Folders aqui!!!
-        // ---
-        // BEGIN
-        //
-
-        //
-        // END
-        //
-
         if (this.Controller == null)
         {
             this.Controller = new DataController<FolderDomain>();
@@ -39,9 +29,7 @@
             // this.CreateDefaults();
         }
 
-        return Task.Run(() => {
-            this.Body = this.RenderBody();
-        });
+        return Task.Run(() => { this.Body = this.RenderBody(); });
     }
 
     private void CreateDefaults()
