@@ -44,7 +44,20 @@
 
     protected async override Task<bool> OnModelPush()
     {
-        var lstUser = await this.PostWithTokenAsync<UserDomain>("User/Teste", this.Model);
+        var lstUser = await this.PostWithTokenAsync<UserDomain>("User/LoginAsync", this.Model, true);
+
+        if (lstUser == null || lstUser.Count <= 0)
+        {
+            return await Task.Run<bool>(() => { return false; });
+        }
+
+        if (lstUser.First().TokenAccess == null)
+        {
+            return await Task.Run<bool>(() => { return false; });
+        }
+
+        var lstFolder = await this.PostWithTokenAsync<FolderDomain>("Folder/FetchAllAsync", new FolderDomain() { UuidUser = lstUser.First().Uuid }, true);
+
         return await base.OnModelPush();
     }
 

@@ -2,10 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.JSInterop;
 using Model;
-using SignalManager.Client.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -30,16 +27,24 @@ namespace SignalManager.Client.Controlers
 
         public async Task<UserDomain> GetCurrentUser()
         {
-            User.Email = await CookieManager.GetValue("sigmgmt_username");
-            User.Password = await CookieManager.GetValue("sigmgmt_password");
+            User.TokenAccess = await CookieManager.GetValue("sigmgmt_token_access");
 
             return User;
         }
 
         public async Task SetCurrentUser(UserDomain user)
         {
-            await CookieManager.SetValue("sigmgmt_username", user.Email, 365);
-            await CookieManager.SetValue("sigmgmt_password", user.Password, 365);
+            await CookieManager.SetValue("sigmgmt_token_access", user.TokenAccess, 1);
+        }
+
+        public static async Task SetTokenAccess(string tokenAccess)
+        {
+            await CookieManager.SetValue("sigmgmt_token_access", tokenAccess, 1);
+        }
+
+        public static async Task<string> GetTokenAccess()
+        {
+            return await CookieManager.GetValue("sigmgmt_token_access");
         }
 
         public static async Task<string> GetValue(string strName)

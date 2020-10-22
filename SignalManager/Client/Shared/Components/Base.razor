@@ -277,34 +277,30 @@
         });
     }
 
-    protected async Task<List<T>> PostWithTokenAsync<T>(string route, T model = default, bool toastNotification = false) where T : IBaseDomain<T>
+    protected async Task<List<T>> PostWithTokenAsync<T>(string route, T model = default, bool toastNotificationError = false) where T : IBaseDomain<T>
     {
         MiddlewareDomain<T> middleware = new MiddlewareDomain<T>();
+        middleware.TokenAccess = await CookieManager.GetTokenAccess();
+        middleware.Objs.Add(model);
         try
         {
-            if (model != null) middleware = await Http.PostJsonAsync<MiddlewareDomain<T>>(route, model);
-            else middleware = await Http.PostJsonAsync<MiddlewareDomain<T>>(route, CookieManager.User.Password);
-
+            middleware = await Http.PostJsonAsync<MiddlewareDomain<T>>(route, middleware);
+            
             if (!string.IsNullOrEmpty(middleware.Exception) || !string.IsNullOrWhiteSpace(middleware.Exception))
             {
-                if (toastNotification) Toaster.Add(middleware.Exception, MatToastType.Danger);
+                if (toastNotificationError) Toaster.Add(middleware.Exception, MatToastType.Danger);
                 Console.WriteLine(middleware.Exception);
                 middleware.Objs = new List<T>() { model };
             }
-            else if (toastNotification)
-            {
-                Toaster.Add("Sucesso", MatToastType.Success);
-                Console.WriteLine("Sucesso");
-            }
 
-            CookieManager.User.Password = middleware.TokenAccess;
-            //await CookieManager.SetValue();
-
+            Console.WriteLine("Sucesso");
+            
+            await CookieManager.SetTokenAccess(middleware.TokenAccess);
             return middleware.Objs;
         }
         catch (Exception ex)
         {
-            if (toastNotification) Toaster.Add(ex.Message, MatToastType.Danger);
+            if (toastNotificationError) Toaster.Add(ex.Message, MatToastType.Danger);
             Console.WriteLine(ex.Message);
             return new List<T>() { model };
         }
