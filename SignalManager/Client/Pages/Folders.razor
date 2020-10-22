@@ -1,0 +1,240 @@
+﻿@inherits Base
+
+@this.Body
+
+@code{
+    [Parameter]
+    public UserDomain User
+    {
+        get;
+        set;
+    }
+
+    [Inject]
+    public DataController<FolderDomain> Controller
+    {
+        get;
+        set;
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        // ---
+        // Carregar Folders aqui!!!
+        // ---
+        // BEGIN
+        //
+
+        //
+        // END
+        //
+
+        if (this.Controller == null)
+        {
+            this.Controller = new DataController<FolderDomain>();
+        }
+
+        if (this.Controller.Count < 1)
+        {
+            // this.CreateDefaults();
+        }
+
+        return Task.Run(() => {
+            this.Body = this.RenderBody();
+        });
+    }
+
+    private void CreateDefaults()
+    {
+        this.Controller.Add(new FolderDomain()
+        {
+            Name = "Pasta 1",
+        });
+    }
+
+    protected override void LoadContent()
+    {
+        this.Class = "d-flex flex-column justify-content-center";
+
+        this.Content = new Collection<RenderFragment>();
+        this.Content.Add(this.GetContainer());
+    }
+
+    public override void ReRenderBody()
+    {
+        this.Body = this.RenderBody();
+        StateHasChanged();
+    }
+
+    private RenderFragment GetContainer()
+    {
+        Base contaiener = new Base();
+        contaiener.Parent = this;
+        contaiener.Class = "d-flex flex-row flex-wrap w-100 p-2";
+        contaiener.Content = new Collection<RenderFragment>();
+
+        foreach (FolderDomain model in this.Controller)
+        {
+            contaiener.Content.Add(this.GetFolder(model));
+        }
+
+        contaiener.Content.Add(this.GetAddFolder());
+
+        return contaiener.RenderBody();
+    }
+
+    private RenderFragment GetFolder(FolderDomain model)
+    {
+        Base folder = new Base();
+        folder.Parent = this;
+        folder.Class = "col-xl-3 col-lg-6 col-md-12 col-sm-12 border rounded p-0";
+        folder.Content = new Collection<RenderFragment>();
+        folder.Content.Add(this.GetFolderHeader(folder, model));
+        folder.Content.Add(this.GetFolderDescription(folder, model));
+        folder.Content.Add(this.GetFolderControllers(folder, model));
+
+        return folder.RenderBody();
+    }
+
+    private RenderFragment GetFolderHeader(Base parent, FolderDomain model)
+    {
+        Base folderHeader = new Base();
+        folderHeader.Parent = this;
+        folderHeader.Class = "col-12 bg-dark text-white rounded-top";
+        folderHeader.Content = new Collection<RenderFragment>();
+        folderHeader.Content.Add(@<B Parent=@parent PText=@model.Name/>);
+
+        return folderHeader.RenderBody();
+    }
+
+    private RenderFragment GetFolderDescription(Base parent, FolderDomain model)
+    {
+        Base folderDescription = new Base();
+        folderDescription.Parent = this;
+        folderDescription.Class = "col-12";
+        folderDescription.Style = "min-height:60px;";
+        folderDescription.Content = new Collection<RenderFragment>();
+        folderDescription.Content.Add(@<span>Descrição da "Pasta 1".</span>);
+
+        return folderDescription.RenderBody();
+    }
+
+    private RenderFragment GetFolderControllers(Base parent, FolderDomain model)
+    {
+        Base ControlsContainer = new Base();
+        ControlsContainer.Parent = parent;
+        ControlsContainer.Class = "col-12 d-inline-flex justify-content-end p-0";
+        ControlsContainer.Content = new Collection<RenderFragment>();
+
+        Base EditHOptionContainer = new Base();
+        EditHOptionContainer.Parent = ControlsContainer;
+        EditHOptionContainer.Class = "d-flex text-center p-0 m-0";
+        EditHOptionContainer.Content = new Collection<RenderFragment>() {
+            this.GetEditControl(model, true)
+        };
+
+        Base RemoveHOptionContainer = new Base();
+        RemoveHOptionContainer.Parent = ControlsContainer;
+        RemoveHOptionContainer.Class = "d-flex text-center p-0 m-0";
+        RemoveHOptionContainer.Content = new Collection<RenderFragment>() {
+            this.GetRemoveControl(model, true)
+        };
+
+        ControlsContainer.Content.Add(EditHOptionContainer.RenderBody());
+        ControlsContainer.Content.Add(RemoveHOptionContainer.RenderBody());
+
+        return ControlsContainer.RenderBody();
+    }
+
+    private RenderFragment GetAddFolderControl()
+    {
+        return @<MatIconButton Icon="@MatIconNames.Add" />;
+    }
+
+    private RenderFragment GetEditControl(FolderDomain model, bool Link = false)
+    {
+        if (Link)
+        {
+            return @<MatIconButton Icon="@MatIconNames.Settings" />;
+            //return @<MatIconButton Icon="@MatIconNames.Edit" OnClick=@(new Action(() => OnEdit(null, model))) />;
+        }
+
+        return @<Button Class="btn btn-dark w-100" Text="Configurações" />;
+        //return @<Button Class="btn btn-dark w-100" OnClick=@(new Action(() => OnEdit(null, model))) Text="Editar"/>;
+    }
+
+    private RenderFragment GetRemoveControl(FolderDomain model, bool Link = false)
+    {
+        if (Link)
+        {
+            return @<MatIconButton Icon="@MatIconNames.Delete" />;
+            //return @<MatIconButton Icon="@MatIconNames.Delete" OnClick=@(new Action(() => OnRemove(null, model)))/>;
+        }
+
+        return @<Button Class="btn btn-dark w-100" Text="Remover" />;
+        //return @<Button Class="btn btn-dark w-100" OnClick=@(new Action(() => OnRemove(null, model))) Text="Remover"/>;
+    }
+
+    private RenderFragment GetAddFolder()
+    {
+        Base folder = new Base();
+        folder.Parent = this;
+        folder.Class = "col-xl-3 col-lg-6 col-md-12 col-sm-12 border rounded justify-content-center p-0";
+        folder.Content = new Collection<RenderFragment>();
+
+        folder.Content.Add(this.GetAddFolderHeader(folder));
+        folder.Content.Add(this.GetAddFolderDescription(folder));
+        folder.Content.Add(this.GetAddFolderControllers(folder));
+
+        return folder.RenderBody();
+    }
+
+    private RenderFragment GetAddFolderHeader(Base parent)
+    {
+        Base folderHeader = new Base();
+        folderHeader.Parent = this;
+        folderHeader.Class = "col-12 bg-dark text-white rounded-top";
+        folderHeader.Content = new Collection<RenderFragment>();
+        folderHeader.Content.Add(@<B Parent=@folderHeader PText="Nova pasta"/>);
+
+        return folderHeader.RenderBody();
+    }
+
+    private RenderFragment GetAddFolderDescription(Base parent)
+    {
+        Base folderDescription = new Base();
+        folderDescription.Parent = this;
+        folderDescription.Class = "col-12";
+        folderDescription.Style = "min-height:60px;";
+        folderDescription.Content = new Collection<RenderFragment>();
+        folderDescription.Content.Add(@<span>&nbsp;</span>);
+
+        return folderDescription.RenderBody();
+    }
+
+    private RenderFragment GetAddFolderControllers(Base parent)
+    {
+        Base ControlsContainer = new Base();
+        ControlsContainer.Parent = parent;
+        ControlsContainer.Class = "col-12 d-inline-flex justify-content-end p-0";
+        ControlsContainer.Content = new Collection<RenderFragment>();
+
+        Base AddFolderHOptionContainer = new Base();
+        AddFolderHOptionContainer.Parent = ControlsContainer;
+        AddFolderHOptionContainer.Class = "d-flex text-center p-0 m-0";
+        AddFolderHOptionContainer.Content = new Collection<RenderFragment>() {
+            this.GetAddFolderControl()
+        };
+
+        ControlsContainer.Content.Add(AddFolderHOptionContainer.RenderBody());
+
+        return ControlsContainer.RenderBody();
+    }
+
+    private RenderFragment GetAddFolderSvg()
+    {
+        return @<svg width="1em" height="1em" viewBox="0 0 16 16" class="d-flex bi bi-plus-circle-fill w-25 h-100 h-md-75" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z" />
+                </svg>;
+    }
+}

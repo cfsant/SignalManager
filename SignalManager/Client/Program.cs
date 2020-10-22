@@ -25,9 +25,11 @@ namespace SignalManager.Client
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
             builder.Services.AddSingleton<BagControler>();
             builder.Services.AddSingleton<UserDomain>();
+            builder.Services.AddSingleton<FolderDomain>();
             builder.Services.AddSingleton<Signal>();
-            builder.Services.AddSingleton<DataControler<UserDomain>>();
-            builder.Services.AddSingleton<DataControler<Signal>>();
+            builder.Services.AddSingleton<DataController<UserDomain>>();
+            builder.Services.AddSingleton<DataController<FolderDomain>>();
+            builder.Services.AddSingleton<DataController<Signal>>();
             builder.Services.AddSingleton<CookieManager>(new CookieManager(
                 builder.Build().Services.GetRequiredService<IJSRuntime>(),
                 builder.Build().Services.GetRequiredService<HttpClient>()));

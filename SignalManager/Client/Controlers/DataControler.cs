@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SignalManager.Client.Controlers
 {
-    public class DataControler<T> : Collection<T>
+    public class DataController<T> : Collection<T>
     {
         public T this[string Uid]
         {

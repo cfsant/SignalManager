@@ -47,17 +47,14 @@
             return;
         }
 
-        @*switch (User.LevelAccess)
-        {
-            case EnmLevelAccess.DEFAULT:
-                this.Content.Add(@<Client Parent="this" User="User"/>);
-                Console.WriteLine("Client.");
-                break;*@
-        //case EnmLevelAccess.ADMIN:
-        this.Content.Add(@<Admin Parent="this" User="User"/>);
-        Console.WriteLine("Admin.");
-        //        break;
-        //}
+        // Cliente
+        // this.Content.Add(@<Client Parent="this" User="User"/>);
+
+        // Admin
+        // this.Content.Add(@<Admin Parent="this" User="User" />);
+
+        // Folder
+        this.Content.Add(@<Folders Parent="this" User="User" />);
     }
 
     public override void ReRenderBody()

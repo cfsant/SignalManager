@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SignalManager.Client.Controlers
 {
-    public class SignalControler : DataControler<Signal>
+    public class SignalControler : DataController<Signal>
     {
     }
 }
