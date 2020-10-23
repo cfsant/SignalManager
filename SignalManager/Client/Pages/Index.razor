@@ -6,11 +6,9 @@
 @code{
     protected override Task OnInitializedAsync()
     {
-        base.OnInitializedAsync();
-
-        return Task.Run(async () =>
-        {
-            User = await CookieManager.GetCurrentUser();
+        return Task.Run(() => {
+            this.DataBag = new BagControler();
+            this.Body = this.RenderBody();
         });
     }
 
@@ -40,26 +38,99 @@
     {
         Console.WriteLine("Load content body...");
 
-        if ((string.IsNullOrEmpty(User.Email) || string.IsNullOrWhiteSpace(User.Email)) || (string.IsNullOrEmpty(User.Password) || string.IsNullOrWhiteSpace(User.Password)))
-        {
-            Console.WriteLine("Undefined.");
+        this.DataBag.Execute(this.UserInitialization());
 
-            return;
+        this.User = this.DataBag.Get("sigmgmt_user") as UserDomain;
+        if (this.User == null)
+        {
+            this.User = new UserDomain();
         }
 
-        // Cliente
-        // this.Content.Add(@<Client Parent="this" User="User"/>);
+        this.DataBag.Execute(this.FoldersInitialization());
 
-        // Admin
-        // this.Content.Add(@<Admin Parent="this" User="User" />);
+        this.Folders = this.DataBag.Get("sigmgmt_folders") as DataController<FolderDomain>;
+        if (this.Folders == null)
+        {
+            this.Folders = new DataController<FolderDomain>();
+        }
 
-        // Folder
-        this.Content.Add(@<Folders Parent="this" User="User" />);
+        if (this.User != null && this.User.Uuid != null && this.User.Uuid != default)
+        {
+            // Cliente
+            // this.Content.Add(@<Client Parent="this" User="User"/>);
+
+            // Admin
+            // this.Content.Add(@<Admin Parent="this" User="User" />);
+
+            // Folder
+            this.Content.Add(@<Folders Parent="this" User="User" />);
+        }
     }
 
     public override void ReRenderBody()
     {
         this.Body = this.RenderBody();
         StateHasChanged();
+    }
+
+    private async Task UserInitialization()
+    {
+        Console.WriteLine("Inicialização do usuário...");
+        UserDomain User = this.DataBag.Get("sigmgmt_user") as UserDomain;
+        if (User != null && !string.IsNullOrEmpty(User?.TokenAccess) && !string.IsNullOrWhiteSpace(User?.TokenAccess) && !string.IsNullOrEmpty(User?.Uuid?.ToString()) && !string.IsNullOrWhiteSpace(User?.Uuid?.ToString()))
+        {
+            Console.WriteLine("Usuário recuperado do databag.");
+
+            return;
+        }
+
+        var TokenAccess = await CookieManager.GetTokenAccess();
+        if (string.IsNullOrEmpty(TokenAccess) || string.IsNullOrWhiteSpace(TokenAccess))
+        {
+            Console.WriteLine("Token inexistente.");
+
+            return;
+        }
+
+        var lstUser = await this.PostWithTokenAsync<UserDomain>("User/LoginWithTokenAsync", new UserDomain() { TokenAccess = TokenAccess }, true);
+        if (lstUser == null || lstUser.Count < 1)
+        {
+            Console.WriteLine("Token inválido.");
+
+            //await CookieManager.SetTokenAccess(null);
+
+            return;
+        }
+
+        User = lstUser.First();
+        if (User == null)
+        {
+            Console.WriteLine("Falha na recuperação.");
+
+            //await CookieManager.SetTokenAccess(null);
+
+            return;
+        }
+
+        Console.WriteLine("Usuário recuperado com sucesso.");
+        this.DataBag.Set(new Bag("sigmgmt_user", User));
+        await CookieManager.SetTokenAccess(User.TokenAccess);
+
+        this.ReRenderBody();
+    }
+
+    private async Task FoldersInitialization()
+    {
+        Console.WriteLine("Inicialização das pastas do usuário...");
+        var lstFolder = await this.PostWithTokenAsync<FolderDomain>("Folder/FetchAllAsync", new FolderDomain() { UuidUser = this.User.Uuid }, true);
+
+        if (lstFolder == null && lstFolder.Count < 1)
+        {
+            return;
+        }
+
+        this.DataBag.Set(new Bag("sigmgmt_folders", Folders));
+
+        this.ReRenderBody();
     }
 }

@@ -75,7 +75,7 @@
 
         this.ReRenderBody();
 
-        await CookieManager.SetCurrentUser(User);
+        //await CookieManager.SetCurrentUser(User);
 
         OnLoginCallback?.Invoke();
     }
@@ -86,7 +86,7 @@
 
         this.ReRenderBody();
 
-        await CookieManager.SetCurrentUser(new UserDomain());
+        //await CookieManager.SetCurrentUser(new UserDomain());
 
         OnLogoutCallback?.Invoke();
     }

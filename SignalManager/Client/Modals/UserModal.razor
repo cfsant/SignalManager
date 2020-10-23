@@ -5,6 +5,13 @@
 
 @code{
     [Inject]
+    public UserDomain User
+    {
+        get;
+        set;
+    }
+
+    [Inject]
     public DataController<FolderDomain> Folders
     {
         get;
@@ -52,21 +59,35 @@
     protected async override Task<bool> OnModelPush()
     {
         var lstUser = await this.PostWithTokenAsync<UserDomain>("User/LoginAsync", this.Model, true);
-
-        if (lstUser == null || lstUser.Count <= 0)
+        if (lstUser == null || lstUser.Count < 1)
         {
-            return await Task.Run<bool>(() => { return false; });
+            return false;
         }
 
-        if (lstUser.First().TokenAccess == null)
+        this.User = lstUser.FirstOrDefault();
+        if (this.User == null || this.User.Uuid == null || this.User.Uuid == default)
         {
-            return await Task.Run<bool>(() => { return false; });
+            return false;
         }
 
-        var lstFolder = await this.PostWithTokenAsync<FolderDomain>("Folder/FetchAllAsync", new FolderDomain() { UuidUser = lstUser.First().Uuid }, true);
+        Console.Write("Create user bag...");
+        this.DataBag.Set(new Bag("sigmgmt_user", this.User));
+        await CookieManager.SetTokenAccess(this.User.TokenAccess, new Action<string>(this.Logger));
+        Console.WriteLine("OK");
+
+        Console.Write("Create folders bag...");
+        var lstFolder = await this.PostWithTokenAsync<FolderDomain>("Folder/FetchAllAsync", new FolderDomain() { UuidUser = this.User.Uuid }, true);
         if (lstFolder != null && lstFolder.Count > 0)
         {
+
             Folders.AddRange(lstFolder);
+            this.DataBag.Set(new Bag("sigmgmt_folders", Folders));
+            Console.WriteLine("OK");
+        }
+        else {
+            Folders = new DataController<FolderDomain>();
+            this.DataBag.Set(new Bag("sigmgmt_folders", Folders));
+            Console.WriteLine("NULL");
         }
 
         return await base.OnModelPush();
@@ -173,5 +194,10 @@
     private RenderFragment GetButton()
     {
         return @<button id="@Guid.NewGuid().ToString()" class="btn btn-dark w-100" type="button" @onclick="OnModelUpdate">Login</button>;
+    }
+
+    private void Logger(string strValue)
+    {
+        Console.WriteLine(strValue);
     }
 }

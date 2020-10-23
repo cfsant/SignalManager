@@ -1,10 +1,17 @@
 ﻿@inherits Base
 
-@this.RenderBody()
+@this.Body
 
 @code {
     [Inject]
     public UserDomain User
+    {
+        get;
+        set;
+    }
+
+    [Inject]
+    public DataController<FolderDomain> Folders
     {
         get;
         set;
@@ -17,8 +24,10 @@
         set;
     }
 
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync()
     {
-        await base.OnInitializedAsync();
+        base.OnInitializedAsync();
+
+        return base.OnInitializedAsync();
     }
 }

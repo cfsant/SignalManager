@@ -30,5 +30,16 @@ namespace SignalManager.Server.Controllers
 
             return middleware;
         }
+
+        [Microsoft.AspNetCore.Mvc.Route("LoginWithTokenAsync")]
+        [HttpPost]
+        public async Task<MiddlewareDomain<UserDomain>> LoginWithTokenAsync([FromBody] MiddlewareDomain<UserDomain> middleware)
+        {
+            if (middleware == null || string.IsNullOrEmpty(middleware.Objs.First().TokenAccess) || string.IsNullOrWhiteSpace(middleware.Objs.First().TokenAccess)) return null;
+
+            middleware = await this.Http.PostJsonAsync<MiddlewareDomain<UserDomain>>("https://localhost:8080/user/login_with_token_async", middleware);
+
+            return middleware;
+        }
     }
 }
