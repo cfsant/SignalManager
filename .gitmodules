@@ -4,3 +4,6 @@
 [submodule "Crypto"]
 	path = Crypto
 	url = https://github.com/veltenguilherme/Crypto.git
+[submodule "SignalManager.Models"]
+	path = SignalManager.Models
+	url = https://github.com/veltenguilherme/IqTaskModel.git
