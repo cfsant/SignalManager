@@ -9,6 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\SignalManager.Models\Model.csproj" />
     <ProjectReference Include="..\Client\SignalManager.Client.csproj" />
     <ProjectReference Include="..\Shared\SignalManager.Shared.csproj" />
   </ItemGroup>

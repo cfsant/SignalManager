@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Crypto\Cryptography\Cryptography.csproj" />
-    <ProjectReference Include="..\..\IqTask\Model\SignalManager.Model.csproj" />
+    <ProjectReference Include="..\..\SignalManager.Models\Model.csproj" />
     <ProjectReference Include="..\Shared\SignalManager.Shared.csproj" />
   </ItemGroup>
 
