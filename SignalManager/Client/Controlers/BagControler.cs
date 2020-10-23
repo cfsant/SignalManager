@@ -33,10 +33,8 @@ namespace SignalManager.Client.Controlers
             {
                 return this.Single<Bag>(x => x.Key == Key);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine(ex.Message);
-
                 return null;
             }
         }
@@ -79,6 +77,24 @@ namespace SignalManager.Client.Controlers
         public object Get(string Key)
         {
             return this[Key]?.Value;
+        }
+
+        public async Task ExecuteAsync(params Task[] pool)
+        {
+            if (pool == null)
+            {
+                return;
+            }
+
+            foreach (Task t in pool)
+            {
+                await t;
+            }
+        }
+
+        public void Execute(params Task[] pool)
+        {
+            Task.Run(async () => await this.ExecuteAsync(pool));
         }
     }
 }

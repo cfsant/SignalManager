@@ -37,9 +37,28 @@ namespace SignalManager.Client.Controlers
             await CookieManager.SetValue("sigmgmt_token_access", user.TokenAccess, 1);
         }
 
-        public static async Task SetTokenAccess(string tokenAccess)
+        public static async Task SetTokenAccess(string tokenAccess, Action<string> logger = null)
         {
-            await CookieManager.SetValue("sigmgmt_token_access", tokenAccess, 1);
+            logger?.Invoke("Salvando token...");
+
+            try
+            {
+                await CookieManager.SetValue("sigmgmt_token_access", tokenAccess, 1);
+            }
+            catch(Exception ex)
+            {
+                logger?.Invoke(ex.Message);
+
+                return;
+            }
+
+            var result = await GetValue("sigmgmt_token_access");
+            if (result == null || result == default)
+            {
+                logger?.Invoke("Falha no salvamento do token.");
+            }
+
+            logger?.Invoke($"Token salvo com sucesso. RESULT: {result}");
         }
 
         public static async Task<string> GetTokenAccess()

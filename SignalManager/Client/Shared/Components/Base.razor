@@ -285,7 +285,7 @@
         try
         {
             middleware = await Http.PostJsonAsync<MiddlewareDomain<T>>(route, middleware);
-            
+
             if (!string.IsNullOrEmpty(middleware.Exception) || !string.IsNullOrWhiteSpace(middleware.Exception))
             {
                 if (toastNotificationError) Toaster.Add(middleware.Exception, MatToastType.Danger);
@@ -293,9 +293,6 @@
                 middleware.Objs = new List<T>() { model };
             }
 
-            Console.WriteLine("Sucesso");
-            
-            await CookieManager.SetTokenAccess(middleware.TokenAccess);
             return middleware.Objs;
         }
         catch (Exception ex)
