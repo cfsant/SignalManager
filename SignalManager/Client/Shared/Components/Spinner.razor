@@ -1,0 +1,90 @@
+﻿@this.Body
+
+@code {
+    private RenderFragment Body
+    {
+        get;
+        set;
+    }
+
+    [Parameter]
+    public string PClass
+    {
+        get
+        {
+            return this.Class;
+        }
+        set
+        {
+            this.Class = value;
+        }
+    }
+
+    [Parameter]
+    public bool PVisible
+    {
+        get
+        {
+            return this.Visible;
+        }
+        set
+        {
+            this.Visible = value;
+        }
+    }
+
+    public bool Visible
+    {
+        get;
+        set;
+    }
+
+    public string Class
+    {
+        get;
+        set;
+    }
+
+    protected override Task OnParametersSetAsync()
+    {
+        return Task.Run(() => {
+            Console.WriteLine(string.Format("Spinner state change {0}.", this.Visible ? "visible." : "hidden."));
+
+            this.Body = this.RenderBody();
+            StateHasChanged();
+        });
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        return Task.Run(() => {
+            if (string.IsNullOrEmpty(this.Class) || string.IsNullOrWhiteSpace(this.Class))
+            {
+                this.Class = "d-flex flex-fill justify-content-center";
+            }
+
+            this.Body = this.RenderBody();
+        });
+    }
+
+    public virtual RenderFragment RenderBody()
+    {
+        this.Body = @<div class="@this.GetClass()" style="min-height:200px">
+                         <div class="spinner-border text-dark align-self-center" role="status">
+                             <span class="sr-only">Loading...</span>
+                         </div>
+                     </div>;
+
+        return this.Body;
+    }
+
+    public string GetClass()
+    {
+        if (this.Visible)
+        {
+            return string.Format("{0} visible", Class);
+        }
+
+        return string.Format("{0} invisible", Class);
+    }
+}

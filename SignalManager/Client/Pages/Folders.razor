@@ -1,6 +1,7 @@
 ﻿@inherits Base
 
 @this.Body
+@this.LoadingSpinner
 
 @code{
     [Parameter]
@@ -17,16 +18,50 @@
         set;
     }
 
-    private bool booFoldersOnInitializeAsync
+    private void FoldersOnInitializeAsyncEvent(bool value)
+    {
+        try
+        {
+            this.LoadingSpinner = @<Spinner PVisible="!value"/>;
+        }
+        finally
+        {
+            this.StateHasChanged();
+        }
+    }
+
+    private RenderFragment LoadingSpinner
     {
         get;
         set;
+    }
+
+    private bool _booFoldersOnInitializeAsync;
+
+    private bool booFoldersOnInitializeAsync
+    {
+        get
+        {
+            return _booFoldersOnInitializeAsync;
+        }
+        set
+        {
+            try
+            {
+                _booFoldersOnInitializeAsync = value;
+            }
+            finally
+            {
+                this.FoldersOnInitializeAsyncEvent(value);
+            }
+        }
     }
 
     protected override async Task OnInitializedAsync()
     {
         await this.DataBag.ExecuteAsync(this.FoldersOnInitializeAsync(this.User));
         this.FoldersInitialization();
+
 
         this.Body = this.RenderBody();
     }
