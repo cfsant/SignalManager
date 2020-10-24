@@ -26,8 +26,10 @@ namespace SignalManager.Client
             builder.Services.AddSingleton<BagControler>();
             builder.Services.AddSingleton<UserDomain>();
             builder.Services.AddSingleton<FolderDomain>();
+            builder.Services.AddSingleton<IqOptionAccount>();
             builder.Services.AddSingleton<Signal>();
             builder.Services.AddSingleton<DataController<UserDomain>>();
+            builder.Services.AddSingleton<DataController<IqOptionAccount>>();
             builder.Services.AddSingleton<DataController<FolderDomain>>();
             builder.Services.AddSingleton<DataController<Signal>>();
             builder.Services.AddSingleton<CookieManager>(new CookieManager(

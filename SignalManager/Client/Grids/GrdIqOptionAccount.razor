@@ -1,0 +1,300 @@
+﻿@inherits Grid<IqOptionAccount>
+@inject UserDomain User 
+
+@this.Body
+
+@code {
+    public bool SelectedAll
+    {
+        get;
+        set;
+    }
+
+    [Parameter]
+    public Action OnEditCallback
+    {
+        get;
+        set;
+    }
+
+    [Parameter]
+    public Action OnRemoveCallback
+    {
+        get;
+        set;
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        base.OnInitializedAsync();
+        this.Class = "d-flex flex-row w-100 align-self-center mt-xl-2 mt-lg-2 p-2";
+        return Task.Run(() => { this.Body = this.RenderBody(); });
+    }
+
+    public override Collection<RenderFragment> GetBase()
+    {
+        Base BaseContainer = new Base();
+        BaseContainer.Parent = this;
+        BaseContainer.Class = "flex-column w-100 m-xl-1 m-lg-1 fnt-default-size-xl fnt-default-size-lg fnt-default-size-md fnt-default-size-sm";
+        BaseContainer.Content = new Collection<RenderFragment>();
+        BaseContainer.Content.Add(this.GetHeader(BaseContainer));
+
+
+        if (this.Data == null || this.Data.Count < 1)
+        {
+            return new Collection<RenderFragment>() { BaseContainer.RenderBody() };
+        }
+
+        foreach (RenderFragment child in this.GetBody(BaseContainer))
+        {
+            BaseContainer.Content.Add(child);
+        }
+
+        return new Collection<RenderFragment>() { BaseContainer.RenderBody() };
+    }
+
+    public override RenderFragment GetHeader(Base Parent)
+    {
+        Base HeaderContainer = new Base();
+        HeaderContainer.Parent = Parent;
+        HeaderContainer.Class = "d-flex flex-column bg-dark text-white rounded w-100 p-2";
+        HeaderContainer.Style = "min-height:44px";
+        HeaderContainer.Content = new Collection<RenderFragment>();
+
+        Base HeaderCardContainer = new Base();
+        HeaderCardContainer.Parent = Parent;
+        HeaderCardContainer.Class = "d-inline-flex d-xl-none d-lg-none d-md-inline-flex d-sm-inline-flex w-100 justify-content-center text-center";
+        HeaderCardContainer.Content = new Collection<RenderFragment>() {
+            new B() { Parent = HeaderContainer, Text="Sinais" }.RenderBody()
+        };
+
+        Base HeaderSubContainer = new Base();
+        HeaderSubContainer.Parent = Parent;
+        HeaderSubContainer.Class = "d-none d-xl-inline-flex d-lg-inline-flex d-md-none d-sm-none  rounded text-white bg-dark w-100";
+        HeaderSubContainer.Content = new Collection<RenderFragment>();
+
+        Base platformHeaderOption = new Base();
+        platformHeaderOption.Parent = HeaderSubContainer;
+        platformHeaderOption.Class = "col-xl-2 col-lg-2 col-md-3 col-sm-3 pt-xl-1 pt-lg-1 text-xl-center";
+        platformHeaderOption.Content = new Collection<RenderFragment>() {
+            new B() { Parent = platformHeaderOption, Text="Plataforma" }.RenderBody()
+        };
+
+        Base accountTypeHeaderOption = new Base();
+        accountTypeHeaderOption.Parent = HeaderSubContainer;
+        accountTypeHeaderOption.Class = "col-xl-7 col-lg54 col-md-10 col-sm-10 pt-xl-1 pt-lg-1 text-xl-center text-lg-center";
+        accountTypeHeaderOption.Content = new Collection<RenderFragment>() {
+            new B() { Parent = accountTypeHeaderOption, Text="Tipo de conta" }.RenderBody()
+        };
+
+        Base emailHeaderOption = new Base();
+        emailHeaderOption.Parent = HeaderSubContainer;
+        emailHeaderOption.Class = "col-xl-2 col-lg-2 col-md-3 col-sm-3 pt-xl-1 pt-lg-1 text-xl-center";
+        emailHeaderOption.Content = new Collection<RenderFragment>() {
+            new B() { Parent = emailHeaderOption, Text="Email" }.RenderBody()
+        };
+
+      
+        Base EditHOption = new Base();
+        EditHOption.Parent = HeaderSubContainer;
+        EditHOption.Class = "col-1";
+        EditHOption.Content = new Collection<RenderFragment>() {
+            new B() { Parent = HeaderContainer, Text="" }.RenderBody()
+        };
+
+        HeaderSubContainer.Content.Add(platformHeaderOption.RenderBody());
+        HeaderSubContainer.Content.Add(accountTypeHeaderOption.RenderBody());
+        HeaderSubContainer.Content.Add(emailHeaderOption.RenderBody());
+        HeaderSubContainer.Content.Add(EditHOption.RenderBody());
+
+        HeaderContainer.Content.Add(HeaderCardContainer.RenderBody());
+        HeaderContainer.Content.Add(HeaderSubContainer.RenderBody());
+
+        return HeaderContainer.RenderBody();
+    }
+
+    public RenderFragment GetHeaderCards(Base Parent)
+    {
+        Base HeaderCardContainer = new Base();
+        HeaderCardContainer.Parent = Parent;
+        HeaderCardContainer.Class = "d-none d-xl-none d-lg-none d-md-inline-flex d-sm-inline-flex rounded text-white bg-dark w-100 p-2";
+        HeaderCardContainer.Content = new Collection<RenderFragment>() {
+            new B() { Parent = HeaderCardContainer, Text="Sinais" }.RenderBody()
+        };
+
+        return HeaderCardContainer.RenderBody();
+    }
+
+    public override Collection<RenderFragment> GetBody(Base Parent)
+    {
+        Collection<RenderFragment> Rows = new Collection<RenderFragment>();
+        if (this.Data == null || this.Data.Count < 1)
+        {
+            return Rows;
+        }
+
+        foreach (IqOptionAccount model in this.Data.OrderBy(x => x.Email))
+        {
+            Base BodyContainer = new Base();
+            BodyContainer.Parent = Parent;
+            BodyContainer.Class = "d-inline-flex flex-row flex-wrap border-sm border-md border-lg tt-col-sm tt-col-md mt-2 w-100 min-sm-h-180";
+            BodyContainer.Style = "border-radius:15px;";
+            BodyContainer.Content = new Collection<RenderFragment>();
+
+
+            Base platformHeaderOptionContainer = new Base();
+                platformHeaderOptionContainer.Parent = BodyContainer;
+                platformHeaderOptionContainer.Class = "col-xl-2 col-lg-2 col-md-3 col-sm-3 pt-xl-1 pt-lg-1 text-xl-center";;
+                platformHeaderOptionContainer.Content = new Collection<RenderFragment>() {
+                new Text() { Parent = platformHeaderOptionContainer, Content=model.EnmPlatform.ToString().Replace("_", " "), Class="text-right text-xl-center text-lg-center" }.RenderBody()
+            };
+
+            RenderFragment platformHeaderOptionLabel = @<Label For="@platformHeaderOptionContainer.Uid" Class="d-block d-xl-none d-lg-none d-md-block d-sm-block col-md-3 col-sm-3 align-self-center text-right" Text="Valor:" Bold="true" Style="max-height:18px"/>;
+
+             Base emailHeaderOptionContainer = new Base();
+                emailHeaderOptionContainer.Parent = BodyContainer;
+                emailHeaderOptionContainer.Class = "col-xl-2 col-lg-2 col-md-3 col-sm-3 pt-xl-1 pt-lg-1 text-xl-center";;
+                emailHeaderOptionContainer.Content = new Collection<RenderFragment>() {
+                new Text() { Parent = emailHeaderOptionContainer, Content=model.Email, Class="text-right text-xl-center text-lg-center" }.RenderBody()
+            };
+
+            RenderFragment emailHeaderOptionLabel = @<Label For="@emailHeaderOptionContainer.Uid" Class="d-block d-xl-none d-lg-none d-md-block d-sm-block col-md-3 col-sm-3 align-self-center text-right" Text="Valor:" Bold="true" Style="max-height:18px"/>;
+
+            Base TagsHOptionContainer = new Base();
+            TagsHOptionContainer.Parent = BodyContainer;
+            TagsHOptionContainer.Class = "col-xl-7 col-lg54 col-md-10 col-sm-10 pt-xl-1 pt-lg-1 text-xl-center text-lg-center";
+            TagsHOptionContainer.Content = new Collection<RenderFragment>();
+
+            TagsHOptionContainer.Content.Add(@<MatChip Label="@model.EnmAccountType.ToString()" Class=@(model.EnmAccountType == EnmAccountType.TREINAMENTO ? "bg-success text-white" : "bg-danger text-white")/>);
+
+            RenderFragment TagsHOptionLabel = @<Label For="@TagsHOptionContainer.Uid" Class="d-block d-xl-none d-lg-none d-md-block d-sm-block col-md-2 col-sm-2 align-self-top pt-1" Bold="true" Style="max-height:18px"/>;
+
+            Base CardFirstRowHOptionContainer = new Base();
+            CardFirstRowHOptionContainer.Parent = BodyContainer;
+            CardFirstRowHOptionContainer.Class = "d-inline-flex d-xl-none d-lg-none d-md-inline-flex d-sm-inline-flex w-100";
+            CardFirstRowHOptionContainer.Content = new Collection<RenderFragment>();
+            CardFirstRowHOptionContainer.Content.Add(platformHeaderOptionLabel);
+
+            // CARD-VIEW
+            Base HOptionCard = new Base();
+            HOptionCard.Parent = BodyContainer;
+            HOptionCard.Class = "d-inline-flex d-xl-none d-lg-none d-md-inline-flex d-sm-inline-flex pt-1 pl-3 pr-3 w-100 bg-dark text-white";
+            HOptionCard.Style = "border-bottom-right-radius:15px; border-bottom-left-radius:15px;";
+            HOptionCard.Content = new Collection<RenderFragment>();
+
+            Base EditHOptionCardContainer = new Base();
+            EditHOptionCardContainer.Parent = HOptionCard;
+            EditHOptionCardContainer.Class = "d-flex w-50 text-center";
+            EditHOptionCardContainer.Content = new Collection<RenderFragment>() {
+                this.GetEditControl(model, false)
+            };
+
+            Base RemoveHOptionCardContainer = new Base();
+            RemoveHOptionCardContainer.Parent = HOptionCard;
+            RemoveHOptionCardContainer.Class = "d-flex w-50 text-center";
+            RemoveHOptionCardContainer.Content = new Collection<RenderFragment>() {
+                this.GetRemoveControl(model, false)
+            };
+
+            HOptionCard.Content.Add(EditHOptionCardContainer.RenderBody());
+            HOptionCard.Content.Add(RemoveHOptionCardContainer.RenderBody());
+
+            // TABLE-VIEW
+            Base EditHOptionContainer = new Base();
+            EditHOptionContainer.Parent = BodyContainer;
+            EditHOptionContainer.Class = "d-xl-block d-lg-block d-md-none d-sm-none text-center p-0 m-0";
+            EditHOptionContainer.Content = new Collection<RenderFragment>() {
+                this.GetEditControl(model, true)
+            };
+
+            Base RemoveHOptionContainer = new Base();
+            RemoveHOptionContainer.Parent = BodyContainer;
+            RemoveHOptionContainer.Class = "d-xl-block d-lg-block d-md-none d-sm-none d-xs-none text-center p-0 m-0";
+            RemoveHOptionContainer.Content = new Collection<RenderFragment>() {
+                this.GetRemoveControl(model, true)
+            };
+
+            // CARD-VIEW 
+            // HIDDEN
+            
+            // FIRST ROW 
+            BodyContainer.Content.Add(CardFirstRowHOptionContainer.RenderBody());
+            BodyContainer.Content.Add(platformHeaderOptionContainer.RenderBody());
+            BodyContainer.Content.Add(TagsHOptionContainer.RenderBody());
+            BodyContainer.Content.Add(emailHeaderOptionContainer.RenderBody());
+
+            // THIRD ROW
+
+            // CONTROL'S
+            BodyContainer.Content.Add(HOptionCard.RenderBody());
+
+            Base ControlsContainer = new Base();
+            ControlsContainer.Parent = BodyContainer;
+            ControlsContainer.Class = "col-1 d-inline-flex justify-content-end";
+            ControlsContainer.Content = new Collection<RenderFragment>();
+            ControlsContainer.Content.Add(EditHOptionContainer.RenderBody());
+            ControlsContainer.Content.Add(RemoveHOptionContainer.RenderBody());
+
+            BodyContainer.Content.Add(ControlsContainer.RenderBody());
+
+            // MODAL
+            BodyContainer.Content.Add(this.GetModal(BodyContainer, model));
+
+            Rows.Add(BodyContainer.RenderBody());
+        }
+
+        return Rows;
+    }
+
+    private RenderFragment GetModal(Base Parent, IqOptionAccount model)
+    {
+        return @<MatDialog @bind-IsOpen="@model.Editing">
+                    <IqOptionAccountModal Parent="Parent" Model="model" OnModelUpdateCallback=@(new Action<IqOptionAccount>((m) => OnModelUpdate(m))) OnCancelationCallback=@(new Action<IqOptionAccount>((m) => OnModalCancelation(m)))/>
+                </MatDialog>;
+    }
+
+    private RenderFragment GetEditControl(IqOptionAccount model, bool Link = false)
+    {
+        if (Link)
+        {
+            return @<MatIconButton Icon="@MatIconNames.Edit" OnClick=@(new Action(() => OnEdit(null, model))) />;
+        }
+
+        return @<Button Class="btn btn-dark w-100" OnClick=@(new Action(() => OnEdit(null, model))) Text="Editar"/>;
+    }
+
+    private RenderFragment GetRemoveControl(IqOptionAccount model, bool Link = false)
+    {
+        if (Link)
+        {
+            return @<MatIconButton Icon="@MatIconNames.Delete" OnClick=@(new Action(() => OnRemove(null, model)))/>;
+        }
+
+        return @<Button Class="btn btn-dark w-100" OnClick=@(new Action(() => OnRemove(null, model))) Text="Remover"/>;
+    }
+
+    private void OnEdit(MouseEventArgs e, IqOptionAccount model)
+    {
+        model.Editing = true;
+        this.OnEditCallback?.Invoke();
+    }
+
+    private void OnRemove(MouseEventArgs e, IqOptionAccount model)
+    {
+        this.Data.Remove(model);
+
+        this.OnRemoveCallback?.Invoke();
+    }
+
+    private void OnModelUpdate(IqOptionAccount model)
+    {
+        this.Data.Update(model, model.Uid);
+
+        this.ReRenderBody();
+    }
+
+    private void OnModalCancelation(IqOptionAccount model)
+    {
+        this.ReRenderBody();
+    }
+}
