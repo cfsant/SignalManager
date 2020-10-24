@@ -18,6 +18,12 @@
         set;
     }
 
+    private bool AddFolderModalIsOpen
+    {
+        get;
+        set;
+    }
+
     private void FoldersOnInitializeAsyncEvent(bool value)
     {
         try
@@ -80,6 +86,7 @@
 
         this.Content = new Collection<RenderFragment>();
         this.Content.Add(this.GetContainer());
+        this.Content.Add(this.GetAddFolderModal(this));
     }
 
     public override void ReRenderBody()
@@ -151,7 +158,7 @@
         folderDescription.Class = "col-12";
         folderDescription.Style = "min-height:60px;";
         folderDescription.Content = new Collection<RenderFragment>();
-        folderDescription.Content.Add(@<span>Descrição da "Pasta 1".</span>);
+        folderDescription.Content.Add(@<Span Text="@model.Description" />);
 
         return folderDescription.RenderBody();
     }
@@ -185,7 +192,7 @@
 
     private RenderFragment GetAddFolderControl()
     {
-        return @<MatIconButton Icon="@MatIconNames.Add" />;
+        return @<MatIconButton Icon="@MatIconNames.Add" OnClick=@(new Action(() => OnAddFolder()))/>;
     }
 
     private RenderFragment GetEditControl(FolderDomain model, bool Link = false)
@@ -283,6 +290,13 @@
                     <path fill-rule="evenodd" d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z" />
                 </svg>;
     }
+    
+    private RenderFragment GetAddFolderModal(Base Parent)
+    {
+        return @<MatDialog @bind-IsOpen="@this.AddFolderModalIsOpen">
+                    <FolderModal Parent="Parent" User="User" Model="new FolderDomain()" OnModelUpdateCallback=@(new Action<FolderDomain>((m) => OnModelUpdate(m))) OnCancelationCallback=@(new Action<FolderDomain>((m) => OnModalCancelation(m)))/>
+                </MatDialog>;
+    }
 
     private async Task FoldersOnInitializeAsync(UserDomain User)
     {
@@ -348,5 +362,28 @@
         }
 
         Console.WriteLine("Pastas do usuário recuperadas do databag.");
+    }
+
+    private void OnAddFolder()
+    {
+        this.AddFolderModalIsOpen = true;
+
+        Console.WriteLine("AddFolderModalIsOpen: " + this.AddFolderModalIsOpen);
+    }
+
+    private void OnModelUpdate(FolderDomain model)
+    {
+        this.AddFolderModalIsOpen = false;
+
+        this.Controller.Add(model);
+
+        this.ReRenderBody();
+    }
+
+    private void OnModalCancelation(FolderDomain model)
+    {
+        this.AddFolderModalIsOpen = false;
+
+        this.ReRenderBody();
     }
 }

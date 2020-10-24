@@ -1,0 +1,267 @@
+﻿@inherits Modal<FolderDomain>
+
+@this.Body
+
+@code {
+    [Parameter]
+    public UserDomain User
+    {
+        get;
+        set;
+    }
+
+    [Inject]
+    public DataController<FolderDomain> Controller
+    {
+        get;
+        set;
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        base.OnInitializedAsync();
+
+        return Task.Run(() =>
+        {
+            if (this.Model == null)
+            {
+                this.Model = new FolderDomain();
+            }
+
+            this.Body = this.RenderBody();
+        });
+    }
+
+    protected override void LoadContent()
+    {
+        if (string.IsNullOrEmpty(this.Class) || string.IsNullOrWhiteSpace(this.Class))
+        {
+            this.Class = "d-flex flex-column p-2 pl-3";
+        }
+
+        this.OnModelLoad();
+
+        this.Content = new Collection<RenderFragment>() {
+            this.GetForm()
+        };
+    }
+
+    protected async override Task<bool> OnModelPush()
+    {
+        var lstFolder = await this.PostWithTokenAsync<FolderDomain>("Folder/UpdateOrInsertInto", this.Model, true);
+        if (lstFolder == null || lstFolder.Count < 1)
+        {
+            return false;
+        }
+
+        this.Controller.AddRange(lstFolder);
+
+        return await base.OnModelPush();
+    }
+
+    protected override void OnModelLoad()
+    {
+        base.OnModelLoad();
+    }
+
+    protected override Task<bool> OnModelValidate()
+    {
+        if (this.Model == null || this.Model == default)
+        {
+            Console.WriteLine("Invalid 'MODEL' value.");
+            return Task.Run<bool>(() => { return false; });
+        }
+
+        if (this.Model.User == null || string.IsNullOrEmpty(this.Model.User.Uuid.ToString()) || string.IsNullOrWhiteSpace(this.Model.User.Uuid.ToString()))
+        {
+            Console.WriteLine("Invalid 'USER' value.");
+            return Task.Run<bool>(() => { return false; });
+        }
+
+        if (string.IsNullOrEmpty(this.Model.UuidUser.ToString()) || string.IsNullOrWhiteSpace(this.Model.UuidUser.ToString()))
+        {
+            Console.WriteLine("Invalid 'USER UUID' value.");
+            return Task.Run<bool>(() => { return false; });
+        }
+
+        if (string.IsNullOrEmpty(this.Model.Name) || string.IsNullOrWhiteSpace(this.Model.Name))
+        {
+            Console.WriteLine("Invalid 'NAME' value.");
+            return Task.Run<bool>(() => { return false; });
+        }
+
+        if (string.IsNullOrEmpty(this.Model.Description) || string.IsNullOrWhiteSpace(this.Model.Description))
+        {
+            Console.WriteLine("Invalid 'DESCRIPTION' value.");
+            return Task.Run<bool>(() => { return false; });
+        }
+
+        return Task.Run<bool>(() => { return true; });
+    }
+
+    protected override Task OnModelBindings()
+    {
+        return Task.Run(() => {
+            this.Model.User = this.User;
+            this.Model.UuidUser = this.User.Uuid;
+        });
+    }
+
+    private RenderFragment GetForm()
+    {
+        Base Container = new Base();
+        Container.Parent = this;
+        Container.Class = "form-row justify-content-center w-100";
+
+        Container.Content = new Collection<RenderFragment>(){
+            this.GetNameInputContainer(this),
+            this.GetDescriptionInputContainer(this),
+            this.GetTakeProfitInputContainer(this),
+            this.GetStopLossInputContainer(this),
+            this.GetCommitButtonContainer(this),
+            this.GetCancelButtonContainer(this)
+        };
+
+        return Container.RenderBody();
+    }
+
+    private RenderFragment GetNameInputContainer(Base Parent)
+    {
+        Base NameInputContainer = new Base();
+        NameInputContainer.Parent = Parent;
+        NameInputContainer.Class = "form-group p-2 w-100";
+
+        if (this.Model == null)
+        {
+            return NameInputContainer.RenderBody();
+        }
+
+        Collection<RenderFragment> NameInputContainerContent = new Collection<RenderFragment>();
+        NameInputContainerContent.Add(@<Label Parent="@NameInputContainer" For="nameInput" Text="Nome:"/>);
+        NameInputContainerContent.Add(@<MatTextField Outlined="true" TValue="string" @bind-Value="@this.Model.Name" Class="w-100" Id="nameInput" />);
+
+        NameInputContainer.Content = NameInputContainerContent;
+
+        return NameInputContainer.RenderBody();
+    }
+
+    private RenderFragment GetDescriptionInputContainer(Base Parent)
+    {
+        Base DescriptioInputContainer = new Base();
+        DescriptioInputContainer.Parent = Parent;
+        DescriptioInputContainer.Class = "form-group p-2 w-100";
+
+        if (this.Model == null)
+        {
+            return DescriptioInputContainer.RenderBody();
+        }
+
+        Collection<RenderFragment> DescriptionInputContainerContent = new Collection<RenderFragment>();
+        DescriptionInputContainerContent.Add(@<Label Parent="@DescriptioInputContainer" For="descriptionInput" Text="Descrição:"/>);
+        DescriptionInputContainerContent.Add(@<MatTextField Outlined="true" TValue="string" @bind-Value="@this.Model.Description" Class="w-100" Id="descriptionInput" />);
+
+        DescriptioInputContainer.Content = DescriptionInputContainerContent;
+
+        return DescriptioInputContainer.RenderBody();
+    }
+
+    private RenderFragment GetTakeProfitInputContainer(Base Parent)
+    {
+        Base TakeProfitInputContainer = new Base();
+        TakeProfitInputContainer.Parent = Parent;
+        TakeProfitInputContainer.Class = "form-group p-2 w-100";
+        TakeProfitInputContainer.Content = new Collection<RenderFragment>();
+
+        Base TakeProfitInputSubContainer = new Base();
+        TakeProfitInputSubContainer.Parent = TakeProfitInputContainer;
+        TakeProfitInputSubContainer.Class = "form-group w-100";
+
+        if (this.Model == null)
+        {
+            TakeProfitInputContainer.Content.Add(TakeProfitInputSubContainer.RenderBody());
+
+            return TakeProfitInputContainer.RenderBody();
+        }
+
+        Collection<RenderFragment> TakeProfitInputSubContainerContent = new Collection<RenderFragment>();
+        TakeProfitInputSubContainerContent.Add(@<Label Parent="@TakeProfitInputSubContainer" For="takeProfitInput" Text="Take Profit:"/>);
+        TakeProfitInputSubContainerContent.Add(@<MatNumericUpDownField @bind-Value="@this.Model.TakeProfit" Outlined="true" FieldType="MatNumericUpDownFieldType.Currency" DecimalPlaces=2 Class="w-100" Id="takeProfitInput" />);
+
+        TakeProfitInputSubContainer.Content = TakeProfitInputSubContainerContent;
+
+        TakeProfitInputContainer.Content.Add(TakeProfitInputSubContainer.RenderBody());
+
+        return TakeProfitInputContainer.RenderBody();
+    }
+
+    private RenderFragment GetStopLossInputContainer(Base Parent)
+    {
+        Base StopLossInputContainer = new Base();
+        StopLossInputContainer.Parent = Parent;
+        StopLossInputContainer.Class = "form-group p-2 w-100";
+        StopLossInputContainer.Content = new Collection<RenderFragment>();
+
+        Base StopLossInputSubContainer = new Base();
+        StopLossInputSubContainer.Parent = StopLossInputContainer;
+        StopLossInputSubContainer.Class = "form-group w-100";
+
+        if (this.Model == null)
+        {
+            StopLossInputContainer.Content.Add(StopLossInputSubContainer.RenderBody());
+
+            return StopLossInputContainer.RenderBody();
+        }
+
+        Collection<RenderFragment> StopLossInputSubContainerContent = new Collection<RenderFragment>();
+        StopLossInputSubContainerContent.Add(@<Label Parent="@StopLossInputSubContainer" For="stopLossInput" Text="Stop Loss:"/>);
+        StopLossInputSubContainerContent.Add(@<MatNumericUpDownField @bind-Value="@this.Model.StopLoss" Outlined="true" FieldType="MatNumericUpDownFieldType.Currency" DecimalPlaces=2 Class="w-100" Id="stopLossInput" />);
+
+        StopLossInputSubContainer.Content = StopLossInputSubContainerContent;
+
+        StopLossInputContainer.Content.Add(StopLossInputSubContainer.RenderBody());
+
+        return StopLossInputContainer.RenderBody();
+    }
+
+    private RenderFragment GetCommitButtonContainer(Base Parent)
+    {
+        Base DateInputContainer = new Base();
+        DateInputContainer.Parent = Parent;
+        DateInputContainer.Class = "form-group d-flex p-2 w-100 align-items-center";
+        DateInputContainer.Content = new Collection<RenderFragment>();
+        DateInputContainer.Content.Add(this.GetButton());
+
+        return DateInputContainer.RenderBody();
+    }
+
+    private RenderFragment GetButton()
+    {
+        return @<button id="@Guid.NewGuid().ToString()" class="btn btn-dark w-100" type="button" @onclick="OnModelUpdate">Adicionar pasta</button>;
+    }
+
+    private RenderFragment GetCancelButtonContainer(Base Parent)
+    {
+        Base CancelButtonContainer = new Base();
+        CancelButtonContainer.Parent = Parent;
+        CancelButtonContainer.Class = "form-group d-flex p-2 w-100 align-items-center";
+        CancelButtonContainer.Content = new Collection<RenderFragment>();
+        CancelButtonContainer.Content.Add(this.GetCancelButton());
+
+        return CancelButtonContainer.RenderBody();
+    }
+
+    private RenderFragment GetCancelButton()
+    {
+        return @<button id="@Guid.NewGuid().ToString()" class="btn btn-dark w-100" type="button" @onclick="OnCancelation">Cancelar</button>;
+    }
+
+    protected override Task OnCancelation()
+    {
+        return base.OnCancelation();
+    }
+
+    private void Logger(string strValue)
+    {
+        Console.WriteLine(strValue);
+    }
+}

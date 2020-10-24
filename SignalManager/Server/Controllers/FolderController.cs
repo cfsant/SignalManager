@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace SignalManager.Server.Controllers
 {
     [ApiController]
-    [Microsoft.AspNetCore.Mvc.Route("folder")]
+    [Microsoft.AspNetCore.Mvc.Route("Folder")]
     public class FolderController : Controller
     {
         private HttpClient Http
@@ -24,6 +24,16 @@ namespace SignalManager.Server.Controllers
         {
             if (middleware == null || middleware.Objs.First().UuidUser == null) return null;
             middleware = await this.Http.PostJsonAsync<MiddlewareDomain<FolderDomain>>("https://localhost:8080/folder/fetch_all_async", middleware);
+
+            return middleware;
+        }
+
+        [Microsoft.AspNetCore.Mvc.Route("UpdateOrInsertInto")]
+        [HttpPost]
+        public async Task<MiddlewareDomain<FolderDomain>> UpdateOrInsertInto([FromBody] MiddlewareDomain<FolderDomain> middleware)
+        {
+            if (middleware == null || middleware.Objs.First().UuidUser == null) return null;
+            middleware = await this.Http.PostJsonAsync<MiddlewareDomain<FolderDomain>>("https://localhost:8080/folder/update_or_insert_async", middleware);
 
             return middleware;
         }
