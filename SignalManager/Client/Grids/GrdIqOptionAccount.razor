@@ -77,24 +77,24 @@
         platformHeaderOption.Parent = HeaderSubContainer;
         platformHeaderOption.Class = "col-xl-2 col-lg-2 col-md-3 col-sm-3 pt-xl-1 pt-lg-1 text-xl-center";
         platformHeaderOption.Content = new Collection<RenderFragment>() {
-            new B() { Parent = platformHeaderOption, Text="Plataforma" }.RenderBody()
+            new B() { Parent = platformHeaderOption, Text="Corretora" }.RenderBody()
         };
 
         Base accountTypeHeaderOption = new Base();
         accountTypeHeaderOption.Parent = HeaderSubContainer;
-        accountTypeHeaderOption.Class = "col-xl-7 col-lg54 col-md-10 col-sm-10 pt-xl-1 pt-lg-1 text-xl-center text-lg-center";
+        accountTypeHeaderOption.Class = "col -xl-2 col-lg-2 col-md-3 col-sm-3 pt-xl-1 pt-lg-1 text-xl-center";
         accountTypeHeaderOption.Content = new Collection<RenderFragment>() {
-            new B() { Parent = accountTypeHeaderOption, Text="Tipo de conta" }.RenderBody()
+            new B() { Parent = accountTypeHeaderOption, Text="Conta" }.RenderBody()
         };
 
         Base emailHeaderOption = new Base();
         emailHeaderOption.Parent = HeaderSubContainer;
-        emailHeaderOption.Class = "col-xl-2 col-lg-2 col-md-3 col-sm-3 pt-xl-1 pt-lg-1 text-xl-center";
+        emailHeaderOption.Class = "col-xl-7 col-lg54 col-md-10 col-sm-10 pt-xl-1 pt-lg-1 text-xl-center text-lg-center";
         emailHeaderOption.Content = new Collection<RenderFragment>() {
             new B() { Parent = emailHeaderOption, Text="Email" }.RenderBody()
         };
 
-      
+
         Base EditHOption = new Base();
         EditHOption.Parent = HeaderSubContainer;
         EditHOption.Class = "col-1";
@@ -103,8 +103,8 @@
         };
 
         HeaderSubContainer.Content.Add(platformHeaderOption.RenderBody());
-        HeaderSubContainer.Content.Add(accountTypeHeaderOption.RenderBody());
         HeaderSubContainer.Content.Add(emailHeaderOption.RenderBody());
+        HeaderSubContainer.Content.Add(accountTypeHeaderOption.RenderBody());
         HeaderSubContainer.Content.Add(EditHOption.RenderBody());
 
         HeaderContainer.Content.Add(HeaderCardContainer.RenderBody());
@@ -143,37 +143,39 @@
 
 
             Base platformHeaderOptionContainer = new Base();
-                platformHeaderOptionContainer.Parent = BodyContainer;
-                platformHeaderOptionContainer.Class = "col-xl-2 col-lg-2 col-md-3 col-sm-3 pt-xl-1 pt-lg-1 text-xl-center";;
-                platformHeaderOptionContainer.Content = new Collection<RenderFragment>() {
+            platformHeaderOptionContainer.Parent = BodyContainer;
+            platformHeaderOptionContainer.Class = "col-xl-2 col-lg-2 col-md-3 col-sm-1 pt-xl-1 pt-lg-1 text-xl-center";;
+            platformHeaderOptionContainer.Content = new Collection<RenderFragment>() {
                 new Text() { Parent = platformHeaderOptionContainer, Content=model.EnmPlatform.ToString().Replace("_", " "), Class="text-right text-xl-center text-lg-center" }.RenderBody()
             };
 
-            RenderFragment platformHeaderOptionLabel = @<Label For="@platformHeaderOptionContainer.Uid" Class="d-block d-xl-none d-lg-none d-md-block d-sm-block col-md-3 col-sm-3 align-self-center text-right" Text="Valor:" Bold="true" Style="max-height:18px"/>;
+            RenderFragment platformHeaderOptionLabel = @<Label For="@platformHeaderOptionContainer.Uid" Class="d-block d-xl-none d-lg-none d-md-block d-sm-block col-md-3 col-sm-3 align-self-center text-right" Text="Corretora:" Bold="true" Style="max-height:18px"/>;
 
              Base emailHeaderOptionContainer = new Base();
-                emailHeaderOptionContainer.Parent = BodyContainer;
-                emailHeaderOptionContainer.Class = "col-xl-2 col-lg-2 col-md-3 col-sm-3 pt-xl-1 pt-lg-1 text-xl-center";;
-                emailHeaderOptionContainer.Content = new Collection<RenderFragment>() {
-                new Text() { Parent = emailHeaderOptionContainer, Content=model.Email, Class="text-right text-xl-center text-lg-center" }.RenderBody()
+             emailHeaderOptionContainer.Parent = BodyContainer;
+             emailHeaderOptionContainer.Class = "col-xl-7 col-lg54 col-md-10 col-sm-10 pt-xl-1 pt-lg-1 text-xl-center text-lg-center";
+             emailHeaderOptionContainer.Content = new Collection<RenderFragment>() {
+             new Text() { Parent = emailHeaderOptionContainer, Content=model.Email, Class="text-right text-xl-center text-lg-center" }.RenderBody()
             };
 
-            RenderFragment emailHeaderOptionLabel = @<Label For="@emailHeaderOptionContainer.Uid" Class="d-block d-xl-none d-lg-none d-md-block d-sm-block col-md-3 col-sm-3 align-self-center text-right" Text="Valor:" Bold="true" Style="max-height:18px"/>;
-
-            Base TagsHOptionContainer = new Base();
-            TagsHOptionContainer.Parent = BodyContainer;
-            TagsHOptionContainer.Class = "col-xl-7 col-lg54 col-md-10 col-sm-10 pt-xl-1 pt-lg-1 text-xl-center text-lg-center";
-            TagsHOptionContainer.Content = new Collection<RenderFragment>();
-
-            TagsHOptionContainer.Content.Add(@<MatChip Label="@model.EnmAccountType.ToString()" Class=@(model.EnmAccountType == EnmAccountType.TREINAMENTO ? "bg-success text-white" : "bg-danger text-white")/>);
-
-            RenderFragment TagsHOptionLabel = @<Label For="@TagsHOptionContainer.Uid" Class="d-block d-xl-none d-lg-none d-md-block d-sm-block col-md-2 col-sm-2 align-self-top pt-1" Bold="true" Style="max-height:18px"/>;
+            RenderFragment emailHeaderOptionLabel = @<Label For="@emailHeaderOptionContainer.Uid" Class="d-block d-xl-none d-lg-none d-md-block d-sm-block col-md-3 col-sm-8 align-self-center text-right" Text="Email:" Bold="true" Style="max-height:18px"/>;
 
             Base CardFirstRowHOptionContainer = new Base();
             CardFirstRowHOptionContainer.Parent = BodyContainer;
             CardFirstRowHOptionContainer.Class = "d-inline-flex d-xl-none d-lg-none d-md-inline-flex d-sm-inline-flex w-100";
             CardFirstRowHOptionContainer.Content = new Collection<RenderFragment>();
             CardFirstRowHOptionContainer.Content.Add(platformHeaderOptionLabel);
+            CardFirstRowHOptionContainer.Content.Add(emailHeaderOptionLabel);
+
+
+            Base TagsHOptionContainer = new Base();
+            TagsHOptionContainer.Parent = BodyContainer;
+            TagsHOptionContainer.Class = "col-xl-2 col-lg-2 col-md-3 col-sm-8 pt-xl-1 pt-lg-1 text-xl-center";
+            TagsHOptionContainer.Content = new Collection<RenderFragment>();
+
+            TagsHOptionContainer.Content.Add(@<MatChip Label="@model.EnmAccountType.ToString()" Class=@(model.EnmAccountType == EnmAccountType.TREINAMENTO ? "bg-success text-white" : "bg-danger text-white")/>);
+
+            RenderFragment TagsHOptionLabel = @<Label For="@TagsHOptionContainer.Uid" Class="d-block d-xl-none d-lg-none d-md-block d-sm-block col-md-2 col-sm-2 align-self-top pt-1" Text="Conta:" Bold="true" Style="max-height:18px"/>;
 
             // CARD-VIEW
             Base HOptionCard = new Base();
@@ -216,14 +218,13 @@
 
             // CARD-VIEW 
             // HIDDEN
-            
+
             // FIRST ROW 
             BodyContainer.Content.Add(CardFirstRowHOptionContainer.RenderBody());
             BodyContainer.Content.Add(platformHeaderOptionContainer.RenderBody());
-            BodyContainer.Content.Add(TagsHOptionContainer.RenderBody());
             BodyContainer.Content.Add(emailHeaderOptionContainer.RenderBody());
+            BodyContainer.Content.Add(TagsHOptionContainer.RenderBody());
 
-            // THIRD ROW
 
             // CONTROL'S
             BodyContainer.Content.Add(HOptionCard.RenderBody());
