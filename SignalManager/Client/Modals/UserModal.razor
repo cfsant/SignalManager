@@ -64,7 +64,7 @@
             return false;
         }
 
-        this.User = lstUser.FirstOrDefault();
+        this.User = lstUser.First();
         if (this.User == null || this.User.Uuid == null || this.User.Uuid == default)
         {
             return false;

@@ -24,10 +24,81 @@
         set;
     }
 
-    protected override Task OnInitializedAsync()
+    protected bool FirstInitialization
     {
-        base.OnInitializedAsync();
+        get;
+        set;
+    } = true;
 
-        return base.OnInitializedAsync();
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await this.UserInitialization();
+        await this.FoldersInitialization();
+
+        this.Body = this.RenderBody();
+    }
+
+    private async Task UserInitialization()
+    {
+        Console.WriteLine("Inicialização do usuário (base)...");
+
+        if (this.User != null && !string.IsNullOrEmpty(this.User.Uuid.ToString()) && !string.IsNullOrWhiteSpace(this.User.Uuid.ToString()))
+        {
+            Console.WriteLine("OK.");
+
+            return;
+        }
+
+        UserDomain User;
+        var TokenAccess = await CookieManager.GetTokenAccess();
+        if (string.IsNullOrEmpty(TokenAccess) || string.IsNullOrWhiteSpace(TokenAccess))
+        {
+            Console.WriteLine("Token inexistente.");
+
+            return;
+        }
+
+        var lstUser = await this.PostWithTokenAsync<UserDomain>("User/LoginWithTokenAsync", new UserDomain() { TokenAccess = TokenAccess }, true);
+        if (lstUser == null || lstUser.Count < 1)
+        {
+            Console.WriteLine("Token inválido.");
+
+            return;
+        }
+
+        User = lstUser.First();
+        if (User == null)
+        {
+            Console.WriteLine("Falha na recuperação.");
+            return;
+        }
+
+        Console.WriteLine("Usuário recuperado com sucesso.");
+        this.DataBag.Set(new Bag("sigmgmt_user", User));
+    }
+
+    private async Task FoldersInitialization()
+    {
+        Console.WriteLine("Inicialização das pastas do usuário (base)...");
+
+        if (this.User == null || string.IsNullOrEmpty(this.User.Uuid.ToString()) || string.IsNullOrWhiteSpace(this.User.Uuid.ToString()))
+        {
+            Console.WriteLine("Skipped.");
+
+            return;
+        }
+
+        var lstFolder = await this.PostWithTokenAsync<FolderDomain>("Folder/FetchAllAsync", new FolderDomain() { UuidUser = this.User.Uuid }, true);
+        if (lstFolder == null && lstFolder.Count < 1)
+        {
+
+            Console.WriteLine("Sem pastas para o usuário informado.");
+
+            return;
+        }
+
+        this.DataBag.Set(new Bag("sigmgmt_folders", lstFolder));
+        Console.WriteLine("OK");
     }
 }
