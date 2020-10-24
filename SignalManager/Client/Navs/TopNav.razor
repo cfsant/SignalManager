@@ -82,7 +82,8 @@
 
     private async Task OnLogout()
     {
-        User = new UserDomain();
+        this.DataBag.Remove("sigmgmt_user");
+        this.DataBag.Remove("sigmgmt_folders");
 
         this.ReRenderBody();
 

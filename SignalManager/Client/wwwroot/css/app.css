@@ -810,8 +810,12 @@ small{
         position: absolute !important;
     }
 
+    .mt-sm-1 {
+        margin-top: .25rem !important
+    }
+
     .mt-sm-2 {
-        margin-top: 5.5vh !important;
+        margin-top: .5rem !important;
     }
 
     /* Margin */
@@ -961,7 +965,7 @@ small{
     }
 
     .mt-md-2 {
-        margin-top: 5.5vh !important;
+        margin-top: .5rem !important;
     }
 
     .pb-md-2 {
@@ -1095,6 +1099,10 @@ small{
     .pb-lg-2 {
         padding-bottom: .5rem !important
     }
+
+    .mt-lg-2 {
+        margin-top: .5rem !important;
+    }
 }
 
 /* Extra large devices (large laptops and desktops, 1200px and up) */
@@ -1222,5 +1230,9 @@ small{
 
     .pb-xl-2 {
         padding-bottom: .5rem !important
+    }
+
+    .mt-xl-2 {
+        margin-top: .5rem !important;
     }
 }

@@ -92,12 +92,18 @@
     {
         Base contaiener = new Base();
         contaiener.Parent = this;
-        contaiener.Class = "d-flex flex-row flex-wrap w-100 p-2";
+        contaiener.Class = "d-flex flex-row flex-wrap w-100 p-2 justify-content-center";
         contaiener.Content = new Collection<RenderFragment>();
 
+        bool first = true;
         foreach (FolderDomain model in this.Controller)
         {
-            contaiener.Content.Add(this.GetFolder(model));
+            contaiener.Content.Add(this.GetFolder(model, first));
+
+            if (first)
+            {
+                first = !first;
+            }
         }
 
         contaiener.Content.Add(this.GetAddFolder());
@@ -105,11 +111,20 @@
         return contaiener.RenderBody();
     }
 
-    private RenderFragment GetFolder(FolderDomain model)
+    private RenderFragment GetFolder(FolderDomain model, bool first)
     {
         Base folder = new Base();
         folder.Parent = this;
-        folder.Class = "col-xl-3 col-lg-6 col-md-12 col-sm-12 border rounded p-0";
+
+        if (first)
+        {
+            folder.Class = "col-xl-3 col-lg-6 col-md-12 col-sm-12 border rounded p-0 mr-xl-2 mr-lg-2 mr-md-2";
+        }
+        else
+        {
+            folder.Class = "col-xl-3 col-lg-6 col-md-12 col-sm-12 border rounded p-0 mr-xl-2 mr-lg-2 mr-md-2 mt-xl-0 mt-lg-2 mt-md-2 mt-sm-2";
+        }
+
         folder.Content = new Collection<RenderFragment>();
         folder.Content.Add(this.GetFolderHeader(folder, model));
         folder.Content.Add(this.GetFolderDescription(folder, model));
@@ -201,7 +216,16 @@
     {
         Base folder = new Base();
         folder.Parent = this;
-        folder.Class = "col-xl-3 col-lg-6 col-md-12 col-sm-12 border rounded justify-content-center p-0";
+
+        if (this.Controller == null || this.Controller.Count < 1)
+        {
+            folder.Class = "col-xl-3 col-lg-6 col-md-12 col-sm-12 border rounded justify-content-center p-0 mr-xl-2 mr-lg-2 mr-md-2";
+        }
+        else
+        {
+            folder.Class = "col-xl-3 col-lg-6 col-md-12 col-sm-12 border rounded justify-content-center p-0 mr-xl-2 mr-lg-2 mr-md-2 mt-xl-0 mt-lg-2 mt-md-2 mt-sm-2";
+        }
+
         folder.Content = new Collection<RenderFragment>();
 
         folder.Content.Add(this.GetAddFolderHeader(folder));
@@ -295,6 +319,7 @@
 
     private void FoldersInitialization()
     {
+        this.Controller = new DataController<FolderDomain>();
         while (!this.booFoldersOnInitializeAsync)
         {
             System.Threading.Thread.Sleep(10);
