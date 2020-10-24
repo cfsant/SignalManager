@@ -54,7 +54,7 @@
         if (!this.FirstInitialization)
         {
             this.UserInitialization();
-            this.FoldersInitialization();
+            //this.FoldersInitialization();
         }
         else
         {
@@ -109,38 +109,6 @@
         Console.WriteLine("Usuário recuperado do databag.");
     }
 
-    private void FoldersInitialization()
-    {
-        while (!this.booFoldersOnInitializeAsync)
-        {
-            System.Threading.Thread.Sleep(10);
-        }
-
-        Console.WriteLine("Inicialização das pastas do usuário (page)...");
-
-        var lstFolders = this.DataBag.Get("sigmgmt_folders") as List<FolderDomain>;
-        if (lstFolders == null || lstFolders.Count < 1)
-        {
-            Console.WriteLine("O usuário corrente não possuí pastas cadastradas.");
-
-            this.Folders = new DataController<FolderDomain>();
-
-            return;
-        }
-
-        this.Folders.AddRange(lstFolders);
-        if (this.Folders == null || this.Folders.Count < 1)
-        {
-            Console.WriteLine("O usuário corrente não possuí pastas cadastradas.");
-
-            this.Folders = new DataController<FolderDomain>();
-
-            return;
-        }
-
-        Console.WriteLine("Pastas do usuário recuperadas do databag.");
-    }
-
     private async Task UserOnInitializeAsync()
     {
         Console.WriteLine("Inicialização do usuário (base)...");
@@ -187,40 +155,7 @@
         finally
         {
             this.booUserOnInitializeAsync = true;
-            await this.FoldersOnInitializeAsync(User);
-        }
-    }
-
-    private async Task FoldersOnInitializeAsync(UserDomain User)
-    {
-        Console.WriteLine("Inicialização das pastas do usuário (base)...");
-
-        this.booFoldersOnInitializeAsync = false;
-
-        try
-        {
-            if (User == null || string.IsNullOrEmpty(User.Uuid.ToString()) || string.IsNullOrWhiteSpace(User.Uuid.ToString()))
-            {
-                Console.WriteLine("Skipped.");
-
-                return;
-            }
-
-            var lstFolder = await this.PostWithTokenAsync<FolderDomain>("Folder/FetchAllAsync", new FolderDomain() { UuidUser = User.Uuid }, true);
-            if (lstFolder == null && lstFolder.Count < 1)
-            {
-
-                Console.WriteLine("Sem pastas para o usuário informado.");
-
-                return;
-            }
-
-            this.DataBag.Set(new Bag("sigmgmt_folders", lstFolder));
-            Console.WriteLine("Pastas do usuário recuperadas com sucesso.");
-        }
-        finally
-        {
-            this.booFoldersOnInitializeAsync = true;
+            //await this.FoldersOnInitializeAsync(User);
         }
     }
 }
