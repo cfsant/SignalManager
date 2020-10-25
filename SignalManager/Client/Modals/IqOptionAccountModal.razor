@@ -78,13 +78,13 @@
         }
 
 
-        if (this.Model.EnmPlatform == EnmPlatform.UNDEFINED)
+        if (this.Model.EnmPlatform == EnmPlatform.INDEFINIDO)
         {
             Toaster.Add("Selecione a corretora.", MatToastType.Danger);
             return Task.Run<bool>(() => { return false; });
         }
 
-        if (this.Model.EnmAccountType == EnmAccountType.UNDEFINED)
+        if (this.Model.EnmAccountType == EnmAccountType.INDEFINIDO)
         {
             Toaster.Add("Selecione o tipo de conta.", MatToastType.Danger);
             return Task.Run<bool>(() => { return false; });

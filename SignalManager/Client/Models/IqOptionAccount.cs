@@ -58,13 +58,13 @@ namespace SignalManager.Client.Models
 
     public enum EnmPlatform
     {
-        UNDEFINED,
+        INDEFINIDO,
         IQ_OPTIONS
     }
 
     public enum EnmAccountType
     {
-        UNDEFINED,
+        INDEFINIDO,
         TREINAMENTO,
         REAL
     }
