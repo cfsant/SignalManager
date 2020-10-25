@@ -27,13 +27,13 @@ namespace SignalManager.Client.Models
         {
             get;
             set;
-        }
+        } = EnmPlatform.IQ_OPTIONS;
 
         public EnmAccountType EnmAccountType
         {
             get;
             set;
-        }
+        } = EnmAccountType.TREINAMENTO;
 
         public bool Selected
         {
@@ -58,14 +58,12 @@ namespace SignalManager.Client.Models
 
     public enum EnmPlatform
     {
-        INDEFINIDO,
-        IQ_OPTIONS
+        IQ_OPTIONS = 1
     }
 
     public enum EnmAccountType
     {
-        INDEFINIDO,
-        TREINAMENTO,
+        TREINAMENTO = 1,
         REAL
     }
 }

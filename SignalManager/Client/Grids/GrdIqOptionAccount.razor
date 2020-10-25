@@ -1,10 +1,16 @@
 ﻿@inherits Grid<IqOptionAccount>
-@inject UserDomain User 
 
 @this.Body
 
 @code {
     public bool SelectedAll
+    {
+        get;
+        set;
+    }
+
+    [Parameter]
+    public UserDomain User
     {
         get;
         set;
@@ -24,11 +30,47 @@
         set;
     }
 
-    protected override Task OnInitializedAsync()
+    public int AccountType
     {
-        base.OnInitializedAsync();
+        get;
+        set;
+    }
+
+    private RenderFragment LoadingSpinner
+    {
+        get;
+        set;
+    }
+
+    private bool _IqOptionAccountInitializedAsync;
+
+    private bool IqOptionAccountInitializedAsync
+    {
+        get
+        {
+            return _IqOptionAccountInitializedAsync;
+        }
+        set
+        {
+            try
+            {
+                _IqOptionAccountInitializedAsync = value;
+            }
+            finally
+            {
+                this.IqOptionAccountOnInitializeAsyncEvent(value);
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
         this.Class = "d-flex flex-row w-100 align-self-center mt-xl-2 mt-lg-2 p-2";
-        return Task.Run(() => { this.Body = this.RenderBody(); });
+
+        await this.DataBag.ExecuteAsync(this.IqOptionAccountOnInitializeAsync(this.User));
+        this.IqOptionAccountInitialization();
+
+        //this.Body = this.RenderBody();
     }
 
     public override Collection<RenderFragment> GetBase()
@@ -297,5 +339,80 @@
     private void OnModalCancelation(IqOptionAccount model)
     {
         this.ReRenderBody();
+    }
+
+    private void IqOptionAccountOnInitializeAsyncEvent(bool value)
+    {
+        try
+        {
+            this.LoadingSpinner = @<Spinner PVisible="!value"/>;
+        }
+        finally
+        {
+            this.StateHasChanged();
+        }
+    }
+
+    private async Task IqOptionAccountOnInitializeAsync(UserDomain User)
+    {
+        Console.WriteLine("IqOptionAccountOnInitializeAsync");
+
+        if (User == null || string.IsNullOrEmpty(User.Uuid.ToString()) || string.IsNullOrWhiteSpace(User.Uuid.ToString()))
+        {
+            Console.WriteLine("Skipped.");
+            return;
+        }
+
+        var lstUser = await this.PostWithTokenAsync<UserDomain>("User/FetchAsync", new UserDomain() { Uuid = User.Uuid }, true);
+        if (lstUser == null && lstUser.Count < 1)
+        {
+            Console.WriteLine("UsersOnInitializeAsync error");
+            return;
+        }
+
+        this.DataBag.Set(new Bag("sigmgmt_users", lstUser));
+        Console.WriteLine("UsersOnInitializeAsync success");
+    }
+
+    private void IqOptionAccountInitialization()
+    {
+        Console.WriteLine("UsersInitialization");
+
+        var lstUsers = this.DataBag.Get("sigmgmt_users") as List<UserDomain>;
+        if (lstUsers == null || lstUsers.Count < 1)
+        {
+            Console.WriteLine("UsersInitialization error");
+            return;
+        }
+
+        List<IqOptionAccount> lstIqOptionAccount = new List<IqOptionAccount>();
+        lstUsers.ForEach(x =>
+        {
+            lstIqOptionAccount.Add(new IqOptionAccount()
+            {
+                Email = x.Email,
+                EnmPlatform = EnmPlatform.IQ_OPTIONS,
+                EnmAccountType = this.GetAccountType(x.IqOptionAccountType).Equals("REAL") ? EnmAccountType.REAL : EnmAccountType.TREINAMENTO
+            });
+        });
+
+        this.Data.AddRange(lstIqOptionAccount);
+        Console.WriteLine("UsersInitialization success " + this.Data.Count);
+    }
+
+    private string GetAccountType(string accountType = default)
+    {
+        if (accountType != default)
+        {
+            if ("PRATICE".Equals(accountType)) return "TREINAMENTO";
+            return accountType;
+        }
+
+        switch (this.AccountType)
+        {
+            case 1: return "PRATICE";
+            case 2: return "REAL";
+            default: return "PRATICE";
+        }
     }
 }

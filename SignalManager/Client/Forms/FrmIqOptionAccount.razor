@@ -1,8 +1,15 @@
-﻿@inherits Form<IqOptionAccount>
+﻿@using Crypto;
 
+@inherits Form<IqOptionAccount>
 @this.Body
 
 @code{
+    [Parameter]
+    public UserDomain User
+    {
+        get;
+        set;
+    }
 
     public int Platform
     {
@@ -10,17 +17,19 @@
         set;
     }
 
-    public string Email
+    public int AccountType
     {
         get;
         set;
     }
 
-    public string Password
+    [Parameter]
+    public new Action OnInitialized
     {
         get;
         set;
     }
+
 
     protected override Task OnInitializedAsync()
     {
@@ -68,15 +77,48 @@
 
     protected override Task<bool> OnModelPush(IqOptionAccount model)
     {
-        return Task.Run<bool>(() =>
+        return Task.Run<bool>(async () =>
         {
             this.Data.Add(model);
 
             this.Model = new IqOptionAccount();
             this.Platform = (int)model.EnmPlatform;
+            this.AccountType = (int)model.EnmAccountType;
+
+            this.User.IqOptionEmail = new Cryptography(model.Email).Encode();
+            this.User.IqOptionToken = new Cryptography(model.Password).Encode();
+            this.User.IqOptionAccountType = this.GetAccountType();
+
+            var lstUser = await this.PostWithTokenAsync<UserDomain>("User/UpdateOrInsertAsync", this.User, true);
+            if (lstUser == null || lstUser.Count < 1)
+            {
+                return false;
+            }
+
+            this.User = lstUser.First();
+            if (this.User == null || this.User.Uuid == null || this.User.Uuid == default)
+            {
+                return false;
+            }
 
             return true;
         });
+    }
+
+    private string GetAccountType(string accountType = default)
+    {
+        if (accountType != default)
+        {
+            if ("PRATICE".Equals(accountType)) return "TREINAMENTO";
+            return accountType;
+        }
+
+        switch (this.AccountType)
+        {
+            case 1: return "PRATICE";
+            case 2: return "REAL";
+            default: return "PRATICE";
+        }
     }
 
     protected override Task<bool> OnModelValidate(IqOptionAccount model)
@@ -96,12 +138,6 @@
         if (string.IsNullOrEmpty(model.Password) || string.IsNullOrWhiteSpace(model.Password))
         {
             Toaster.Add("O campo \"Senha\" não pode ser vazio.", MatToastType.Danger);
-            return Task.Run<bool>(() => { return false; });
-        }
-
-        if (model.EnmPlatform == EnmPlatform.INDEFINIDO)
-        {
-            Toaster.Add("Selecione a corretora.", MatToastType.Danger);
             return Task.Run<bool>(() => { return false; });
         }
 
@@ -126,7 +162,6 @@
             this.GetPasswordInputContainer(Container),
             this.GetCommitButtonContainer(Container)
         };
-
 
         return Container.RenderBody();
     }

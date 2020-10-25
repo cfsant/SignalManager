@@ -12,9 +12,9 @@
 
     protected override Task OnInitializedAsync()
     {
-        this.Body = this.RenderBody();
-
-        return base.OnInitializedAsync();
+        return Task.Run(() => {
+            this.Body = this.RenderBody();
+        });
     }
 
     protected override void LoadContent()
@@ -22,8 +22,8 @@
         this.Class = "d-flex flex-column justify-content-center";
 
         this.Content = new Collection<RenderFragment>();
-        this.Content.Add(@<FrmIqOptionAccount Parent=this OnFormSubmitCallBack=@(new Action(ReRenderBody)) />);
-        this.Content.Add(@<GrdIqOptionAccount Parent=this OnEditCallback=@(new Action(ReRenderBody)) OnRemoveCallback=@(new Action(ReRenderBody))/>);
+        this.Content.Add(@<FrmIqOptionAccount Parent=this OnFormSubmitCallBack=@(new Action(ReRenderBody)) User=User />);
+        this.Content.Add(@<GrdIqOptionAccount Parent=this OnEditCallback=@(new Action(ReRenderBody)) User=User/>);
     }
 
     public override void ReRenderBody()

@@ -115,8 +115,7 @@
         Console.WriteLine("Inicialização do usuário (base)...");
 
         this.booUserOnInitializeAsync = false;
-        UserDomain User = null;
-
+    
         try
         {
             if (this.User != null && !string.IsNullOrEmpty(this.User.Uuid.ToString()) && !string.IsNullOrWhiteSpace(this.User.Uuid.ToString()))
@@ -143,15 +142,15 @@
                 return;
             }
 
-            User = lstUser.First();
-            if (User == null)
+            this.User = lstUser.First();
+            if (this.User == null)
             {
                 Console.WriteLine("Falha na recuperação.");
                 return;
             }
 
             Console.WriteLine("Usuário recuperado com sucesso.");
-            this.DataBag.Set(new Bag("sigmgmt_user", User));
+            this.DataBag.Set(new Bag("sigmgmt_user", this.User));
         }
         finally
         {
