@@ -30,6 +30,11 @@
         set;
     }
 
+    public static bool EnableAddButton
+    {
+        get;
+        set;
+    } = true;
 
     protected override Task OnInitializedAsync()
     {
@@ -85,7 +90,7 @@
             this.Platform = (int)model.EnmPlatform;
             this.AccountType = (int)model.EnmAccountType;
 
-            this.User.IqOptionEmail = new Cryptography(model.Email).Encode();
+            this.User.IqOptionEmail = model.Email;
             this.User.IqOptionToken = new Cryptography(model.Password).Encode();
             this.User.IqOptionAccountType = this.GetAccountType();
 
@@ -285,7 +290,15 @@
 
     private RenderFragment GetButton()
     {
-         return @<button id="@Guid.NewGuid().ToString()" class="btn btn-dark d-flex w-lg-100 w-md-100 w-sm-100 pt-3 pb-3 align-items-center justify-content-center" type="button" style="height: 56px; width: 56px;" @onclick="OnCommit">
+        if (EnableAddButton)
+        {
+            return @<button id="@Guid.NewGuid().ToString()" class="btn btn-dark d-flex w-lg-100 w-md-100 w-sm-100 pt-3 pb-3 align-items-center justify-content-center" type="button" style="height: 56px; width: 56px;" @onclick="OnCommit">
+                    <span class="d-xl-none justify-content-center">Vincular</span>
+                    <MatIcon Icon="@MatIconNames.Add_circle" Class="d-none d-xl-flex d-lg-flex d-md-flex justify-content-center pl-xl-0 pl-lg-2 pl-md-2 pl-sm-3" />
+                </button>;
+        }
+
+        return @<button id="@Guid.NewGuid().ToString()" disabled class="btn btn-dark d-flex w-lg-100 w-md-100 w-sm-100 pt-3 pb-3 align-items-center justify-content-center" type="button" style="height: 56px; width: 56px;" @onclick="OnCommit">
                     <span class="d-xl-none justify-content-center">Vincular</span>
                     <MatIcon Icon="@MatIconNames.Add_circle" Class="d-none d-xl-flex d-lg-flex d-md-flex justify-content-center pl-xl-0 pl-lg-2 pl-md-2 pl-sm-3" />
                 </button>;

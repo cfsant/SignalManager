@@ -31,6 +31,13 @@ namespace SignalManager.Server.Controllers
             return await this.Http.PostJsonAsync<MiddlewareDomain<UserDomain>>("https://localhost:8080/user/fetch_async", middleware);
         }
 
+        [Microsoft.AspNetCore.Mvc.Route("RemoveBondAsync")]
+        [HttpPost]
+        public async Task<MiddlewareDomain<UserDomain>> RemoveBondAsync([FromBody] MiddlewareDomain<UserDomain> middleware)
+        {
+            return await this.Http.PostJsonAsync<MiddlewareDomain<UserDomain>>("https://localhost:8080/user/remove_bond_async", middleware);
+        }
+
         [Microsoft.AspNetCore.Mvc.Route("UpdateOrInsertAsync")]
         [HttpPost]
         public async Task<MiddlewareDomain<UserDomain>> UpdateOrInsertAsync([FromBody] MiddlewareDomain<UserDomain> middleware)

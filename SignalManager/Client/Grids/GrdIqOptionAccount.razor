@@ -70,7 +70,7 @@
         await this.DataBag.ExecuteAsync(this.IqOptionAccountOnInitializeAsync(this.User));
         this.IqOptionAccountInitialization();
 
-        //this.Body = this.RenderBody();
+        this.Body = this.RenderBody();
     }
 
     public override Collection<RenderFragment> GetBase()
@@ -292,7 +292,7 @@
     private RenderFragment GetModal(Base Parent, IqOptionAccount model)
     {
         return @<MatDialog @bind-IsOpen="@model.Editing">
-                    <IqOptionAccountModal Parent="Parent" Model="model" OnModelUpdateCallback=@(new Action<IqOptionAccount>((m) => OnModelUpdate(m))) OnCancelationCallback=@(new Action<IqOptionAccount>((m) => OnModalCancelation(m)))/>
+                    <IqOptionAccountModal Parent="Parent" User="User" Model="model" OnModelUpdateCallback=@(new Action<IqOptionAccount>((m) => OnModelUpdate(m))) OnCancelationCallback=@(new Action<IqOptionAccount>((m) => OnModalCancelation(m)))/>
                 </MatDialog>;
     }
 
@@ -322,11 +322,22 @@
         this.OnEditCallback?.Invoke();
     }
 
-    private void OnRemove(MouseEventArgs e, IqOptionAccount model)
+    private Task OnRemove(MouseEventArgs e, IqOptionAccount model)
     {
         this.Data.Remove(model);
 
-        this.OnRemoveCallback?.Invoke();
+        return Task.Run(async () =>
+        {
+            var lstUser = await this.PostWithTokenAsync<UserDomain>("User/RemoveBondAsync", this.User, true);
+            if (lstUser == null && lstUser.Count < 1)
+            {
+                Console.WriteLine("UsersOnInitializeAsync error");
+                return false;
+            }
+
+            this.OnRemoveCallback?.Invoke();
+            return true;
+        });
     }
 
     private void OnModelUpdate(IqOptionAccount model)
@@ -388,16 +399,21 @@
         List<IqOptionAccount> lstIqOptionAccount = new List<IqOptionAccount>();
         lstUsers.ForEach(x =>
         {
-            lstIqOptionAccount.Add(new IqOptionAccount()
+            if (!string.IsNullOrEmpty(x.IqOptionEmail) && !string.IsNullOrWhiteSpace(x.IqOptionEmail))
             {
-                Email = x.Email,
-                EnmPlatform = EnmPlatform.IQ_OPTIONS,
-                EnmAccountType = this.GetAccountType(x.IqOptionAccountType).Equals("REAL") ? EnmAccountType.REAL : EnmAccountType.TREINAMENTO
-            });
+                FrmIqOptionAccount.EnableAddButton = false;
+                lstIqOptionAccount.Add(new IqOptionAccount()
+                {
+                    Email = x.IqOptionEmail,
+                    EnmPlatform = EnmPlatform.IQ_OPTIONS,
+                    EnmAccountType = this.GetAccountType(x.IqOptionAccountType).Equals("REAL") ? EnmAccountType.REAL : EnmAccountType.TREINAMENTO
+                });
+            }
         });
 
         this.Data.AddRange(lstIqOptionAccount);
         Console.WriteLine("UsersInitialization success " + this.Data.Count);
+        this.OnEditCallback?.Invoke();
     }
 
     private string GetAccountType(string accountType = default)

@@ -23,12 +23,12 @@
 
         this.Content = new Collection<RenderFragment>();
         this.Content.Add(@<FrmIqOptionAccount Parent=this OnFormSubmitCallBack=@(new Action(ReRenderBody)) User=User />);
-        this.Content.Add(@<GrdIqOptionAccount Parent=this OnEditCallback=@(new Action(ReRenderBody)) User=User/>);
-    }
+        this.Content.Add(@<GrdIqOptionAccount Parent=this OnEditCallback=@(new Action(ReRenderBody)) OnRemoveCallback=@(new Action(ReRenderBody))  User=User/>);
+        }
 
-    public override void ReRenderBody()
-    {
-        this.Body = this.RenderBody();
-        StateHasChanged();
+        public override void ReRenderBody()
+        {
+            this.Body = this.RenderBody();
+            StateHasChanged();
+        }
     }
-}

@@ -3,98 +3,125 @@
 @this.Body
 
 @code{
-    public int Platform
-    {
-        get;
-        set;
-    }
-
-    public int AccountType
-    {
-        get;
-        set;
-    }
-
-    protected override Task OnInitializedAsync()
-    {
-        base.OnInitializedAsync();
-
-        return Task.Run(() =>
+        [Parameter]
+        public UserDomain User
         {
-            this.Body = this.RenderBody();
-        });
-    }
-
-    protected override void LoadContent()
-    {
-        if (string.IsNullOrEmpty(this.Class) || string.IsNullOrWhiteSpace(this.Class))
+            get;
+            set;
+        }
+        public int Platform
         {
-            this.Class = "d-flex flex-column";
+            get;
+            set;
         }
 
-        this.OnModelLoad();
+        public int AccountType
+        {
+            get;
+            set;
+        }
 
-        this.Content = new Collection<RenderFragment>() {
+        protected override Task OnInitializedAsync()
+        {
+            base.OnInitializedAsync();
+
+            return Task.Run(() =>
+            {
+                this.Body = this.RenderBody();
+            });
+        }
+
+        protected override void LoadContent()
+        {
+            if (string.IsNullOrEmpty(this.Class) || string.IsNullOrWhiteSpace(this.Class))
+            {
+                this.Class = "d-flex flex-column";
+            }
+
+            this.OnModelLoad();
+
+            this.Content = new Collection<RenderFragment>() {
             this.GetPlatformInputContainer(this),
             this.GetEmailInputContainer(this),
             this.GetAccountTypeInputContainer(this),
             this.GetCommitButtonContainer(this),
             this.GetCancelButtonContainer(this)
         };
-    }
-
-    protected override Task<bool> OnModelPush()
-    {
-        this.Model.Editing = false;
-        return base.OnModelPush();
-    }
-
-    protected override void OnModelLoad()
-    {
-        base.OnModelLoad();
-
-        this.Platform = (int)this.Model.EnmPlatform;
-        this.AccountType = (int)this.Model.EnmAccountType;
-    }
-
-    protected override Task<bool> OnModelValidate()
-    {
-        if (this.Model == null || this.Model == default)
-        {
-            Toaster.Add("Informações inválidas.", MatToastType.Danger);
-            return Task.Run<bool>(() => { return false; });
         }
 
-        if (string.IsNullOrEmpty(this.Model.Email) || string.IsNullOrWhiteSpace(this.Model.Email))
+        protected override async Task<bool> OnModelPush()
         {
-            Toaster.Add("Email inválido.", MatToastType.Danger);
-            return Task.Run<bool>(() => { return false; });
+            this.Model.Editing = false;
+
+            this.User.IqOptionEmail = this.Model.Email;
+            this.User.IqOptionAccountType = this.GetAccountType();
+
+            var lstUser = await this.PostWithTokenAsync<UserDomain>("User/UpdateOrInsertAsync", this.User, true);
+            if (lstUser == null && lstUser.Count < 1)
+            {
+                Console.WriteLine("UsersOnInitializeAsync error");
+                return false;
+            }
+
+            return true;
         }
 
-        if (string.IsNullOrEmpty(this.Model.Password) || string.IsNullOrWhiteSpace(this.Model.Password))
+        private string GetAccountType(string accountType = default)
         {
-            Toaster.Add("O campo \"Senha\" não pode ser vazio.", MatToastType.Danger);
-            return Task.Run<bool>(() => { return false; });
+            if (accountType != default)
+            {
+                if ("PRATICE".Equals(accountType)) return "TREINAMENTO";
+                return accountType;
+            }
+
+            switch (this.AccountType)
+            {
+                case 1: return "PRATICE";
+                case 2: return "REAL";
+                default: return "PRATICE";
+            }
         }
 
-        return Task.Run<bool>(() => { return true; });
-    }
+        protected override void OnModelLoad()
+        {
+            base.OnModelLoad();
 
-    protected override Task OnModelBindings()
-    {
-        this.Model.EnmPlatform = (EnmPlatform)this.Platform;
-        this.Model.EnmAccountType = (EnmAccountType)this.AccountType;
+            this.Platform = (int)this.Model.EnmPlatform;
+            this.AccountType = (int)this.Model.EnmAccountType;
+        }
 
-        return base.OnModelBindings();
-    }
+        protected override Task<bool> OnModelValidate()
+        {
+            if (this.Model == null || this.Model == default)
+            {
+                Toaster.Add("Informações inválidas.", MatToastType.Danger);
+                return Task.Run<bool>(() => { return false; });
+            }
 
-    private RenderFragment GetForm()
-    {
-        Base Container = new Base();
-        Container.Parent = this;
-        Container.Class = "form-row justify-content-center w-100";
+            if (string.IsNullOrEmpty(this.Model.Email) || string.IsNullOrWhiteSpace(this.Model.Email))
+            {
+                Toaster.Add("Email inválido.", MatToastType.Danger);
+                return Task.Run<bool>(() => { return false; });
+            }
 
-        Container.Content = new Collection<RenderFragment>(){
+            return Task.Run<bool>(() => { return true; });
+        }
+
+        protected override Task OnModelBindings()
+        {
+            this.Model.EnmPlatform = (EnmPlatform)this.Platform;
+            this.Model.EnmAccountType = (EnmAccountType)this.AccountType;
+
+            return base.OnModelBindings();
+        }
+
+        private RenderFragment GetForm()
+        {
+            Base Container = new Base();
+            Container.Parent = this;
+            Container.Class = "form-row justify-content-center w-100";
+
+            Container.Content = new Collection<RenderFragment>(){
             this.GetPlatformInputContainer(Container),
             this.GetEmailInputContainer(Container),
             this.GetAccountTypeInputContainer(Container),
@@ -102,33 +129,33 @@
             this.GetCancelButtonContainer(Container)
         };
 
-        return Container.RenderBody();
-    }
-
-    private RenderFragment GetEmailInputContainer(Base Parent)
-    {
-        Base emailInputContainer = new Base();
-        emailInputContainer.Parent = Parent;
-        emailInputContainer.Class = "form-group p-2 w-100";
-        emailInputContainer.Content = new Collection<RenderFragment>();
-
-        Base emailSubContainer = new Base();
-        emailSubContainer.Parent = emailInputContainer;
-        emailSubContainer.Class = "form-group w-100";
-
-        if (this.Model == null)
-        {
-            emailInputContainer.Content.Add(emailSubContainer.RenderBody());
-            return emailInputContainer.RenderBody();
+            return Container.RenderBody();
         }
 
-        Collection<RenderFragment> emailInputSubContainerContent = new Collection<RenderFragment>();
-        emailInputSubContainerContent.Add(@<Label Parent="@emailSubContainer" For="emailInput" Text="Email:" />);
-        emailInputSubContainerContent.Add(@<MatTextField Outlined="true" TValue="string" @bind-Value="@this.Model.Email" Class="w-100" Id="emailInput"/>);
+        private RenderFragment GetEmailInputContainer(Base Parent)
+        {
+            Base emailInputContainer = new Base();
+            emailInputContainer.Parent = Parent;
+            emailInputContainer.Class = "form-group p-2 w-100";
+            emailInputContainer.Content = new Collection<RenderFragment>();
 
-        emailSubContainer.Content = emailInputSubContainerContent;
-        emailInputContainer.Content.Add(emailSubContainer.RenderBody());
-        return emailInputContainer.RenderBody();
+            Base emailSubContainer = new Base();
+            emailSubContainer.Parent = emailInputContainer;
+            emailSubContainer.Class = "form-group w-100";
+
+            if (this.Model == null)
+            {
+                emailInputContainer.Content.Add(emailSubContainer.RenderBody());
+                return emailInputContainer.RenderBody();
+            }
+
+            Collection<RenderFragment> emailInputSubContainerContent = new Collection<RenderFragment>();
+            emailInputSubContainerContent.Add(@<Label Parent="@emailSubContainer" For="emailInputModal" Text="Email:" />);
+            emailInputSubContainerContent.Add(@<MatTextField Outlined="true" TValue="string" @bind-Value="@this.Model.Email" Class="w-100" Id="emailInputModal"/>);
+
+            emailSubContainer.Content = emailInputSubContainerContent;
+            emailInputContainer.Content.Add(emailSubContainer.RenderBody());
+            return emailInputContainer.RenderBody();
     }
 
     private RenderFragment GetPlatformInputContainer(Base Parent)
@@ -150,7 +177,7 @@
         }
 
         Collection<RenderFragment> platformInputSubContainerContent = new Collection<RenderFragment>();
-        platformInputSubContainerContent.Add(@<Label Parent="@platformInputSubContainer" Class="w-100" For="pairInput" Text="Plataforma:" />);
+        platformInputSubContainerContent.Add(@<Label Parent="@platformInputSubContainer" Class="w-100" For="platformInputModal" Text="Plataforma:" />);
         platformInputSubContainerContent.Add(this.GetPlatformInputField());
 
         platformInputSubContainer.Content = platformInputSubContainerContent;
@@ -178,7 +205,7 @@
         }
 
         Collection<RenderFragment> accountTypeInputSubContainerContent = new Collection<RenderFragment>();
-        accountTypeInputSubContainerContent.Add(@<Label Parent="@accountTypeInputSubContainer" Class="w-100" For="accountTypeInput" Text="Tipo de conta:" />);
+        accountTypeInputSubContainerContent.Add(@<Label Parent="@accountTypeInputSubContainer" Class="w-100" For="accountTypeInputModal" Text="Tipo de conta:" />);
         accountTypeInputSubContainerContent.Add(this.GetAccountTypeInputField());
 
         accountTypeInputSubContainer.Content = accountTypeInputSubContainerContent;
@@ -189,7 +216,7 @@
 
     private RenderFragment GetPlatformInputField()
     {
-        return @<MatSelect Outlined="true" @bind-Value="@this.Platform" Class="w-100" Id="pairInput">
+        return @<MatSelect Outlined="true" @bind-Value="@this.Platform" Class="w-100" Id="platformInputModal">
          @foreach (RenderFragment option in this.GetPlatformInputFieldOptions())
         {
             @option
@@ -199,7 +226,7 @@
 
     private RenderFragment GetAccountTypeInputField()
     {
-        return @<MatSelect Outlined="true" @bind-Value="@this.AccountType" Class="w-100" Id="pairInput">
+        return @<MatSelect Outlined="true" @bind-Value="@this.AccountType" Class="w-100" Id="accountTypeModal">
          @foreach (RenderFragment option in this.GetAccountTypeInputFieldOptions())
         {
             @option
