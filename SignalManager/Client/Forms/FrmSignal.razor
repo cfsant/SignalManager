@@ -21,6 +21,13 @@
         set;
     }
 
+    [Parameter]
+    public Action OnUserLinkCallback
+    {
+        get;
+        set;
+    }
+
     protected override Task OnInitializedAsync()
     {
         base.OnInitializedAsync();
@@ -140,31 +147,6 @@
             this.GetMartinGaleValueInputContainer(Container),
             this.GetCommitButtonContainer(Container)
         };
-
-        //Base Row1 = new Base();
-        //Row1.Parent = Container;
-        //Row1.Class = "d-flex flex-row w-100";
-        //Row1.Content = new Collection<RenderFragment>()
-        //{
-        //    this.GetDateInputContainer(Container),
-        //    this.GetDurationInputContainer(Container),
-        //    this.GetPairInputContainer(Container),
-        //    this.GetDirectionInputContainer(Container)
-        //};
-
-        //Base Row2 = new Base();
-        //Row2.Parent = Container;
-        //Row2.Class = "d-flex flex-row w-100";
-        //Row2.Content = new Collection<RenderFragment>()
-        //{
-        //    this.GetAmountInputContainer(Container),
-        //    this.GetMartinGaleInputContainer(Container),
-        //    this.GetMartinGaleValueInputContainer(Container),
-        //    this.GetCommitButtonContainer(Container)
-        //};
-
-        //Container.Content.Add(Row1.RenderBody());
-        //Container.Content.Add(Row2.RenderBody());
 
         return Container.RenderBody();
     }
@@ -448,10 +430,21 @@
         DateInputContainer.Style = "min-height:56px";
         DateInputContainer.Content = new Collection<RenderFragment>()
         {
+            this.GetButtonUser(),
             this.GetButton()
         };
 
         return DateInputContainer.RenderBody();
+    }
+
+    private RenderFragment GetButtonUser()
+    {
+        return @<div class="pr-2">
+                    <button id="@Guid.NewGuid().ToString()" class="btn btn-dark d-flex w-lg-100 w-md-100 w-sm-100 pt-3 pb-3 align-items-center justify-content-center" type="button" style="height: 56px; width: 56px;" @onclick="OnUserLink">
+                        <span class="d-xl-none justify-content-center">Adicionar usuários</span>
+                        <MatIcon Icon="@MatIconNames.Supervised_user_circle" Class="d-none d-xl-flex d-lg-flex d-md-flex justify-content-center pl-xl-0 pl-lg-2 pl-md-2 pl-sm-3" />
+                    </button>
+                </div>;
     }
 
     private RenderFragment GetButton()
@@ -467,5 +460,10 @@
         Task.Run(async () => {
             await this.OnFormSubmit(this.Model);
         });
+    }
+
+    private void OnUserLink()
+    {
+        this.OnUserLinkCallback?.Invoke();
     }
 }

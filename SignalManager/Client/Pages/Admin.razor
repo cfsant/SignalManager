@@ -10,6 +10,13 @@
         set;
     }
 
+    [Parameter]
+    public Action OnUserLinkCallback
+    {
+        get;
+        set;
+    }
+
     protected override Task OnInitializedAsync()
     {
         this.Body = this.RenderBody();
@@ -22,7 +29,7 @@
         this.Class = "d-flex flex-column justify-content-center";
 
         this.Content = new Collection<RenderFragment>();
-        this.Content.Add(@<FrmSignal Parent=this OnFormSubmitCallBack=@(new Action(ReRenderBody)) />);
+        this.Content.Add(@<FrmSignal Parent=this OnFormSubmitCallBack=@(new Action(ReRenderBody)) OnUserLinkCallback=@(new Action(SetUserLinkCallback))/>);
         this.Content.Add(@<GrdSignal Parent=this OnEditCallback=@(new Action(ReRenderBody)) OnRemoveCallback=@(new Action(ReRenderBody))/>);
     }
 
@@ -30,5 +37,10 @@
     {
         this.Body = this.RenderBody();
         StateHasChanged();
+    }
+
+    public void SetUserLinkCallback()
+    {
+        this.OnUserLinkCallback?.Invoke();
     }
 }

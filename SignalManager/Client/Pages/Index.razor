@@ -16,6 +16,12 @@
         set;
     }
 
+    private bool booFrmUserLink
+    {
+        get;
+        set;
+    }
+
     protected override Task OnInitializedAsync()
     {
         return Task.Run(async () => {
@@ -62,16 +68,22 @@
 
         if (this.User != null && this.User.Uuid != null && this.User.Uuid != default)
         {
+            if (this.booFrmUserLink)
+            {
+                this.Content.Add(@<IqOptionAccount Parent="this" User="User" />);
+                return;
+            }
+
             // Cliente
             // this.Content.Add(@<Client Parent="this" User="User"/>);
 
             // Admin
-            @*this.Content.Add(@<Admin Parent = "this" User = "User" />);*@
+            this.Content.Add(@<Admin Parent = "this" User ="User" OnUserLinkCallback=@(new Action(SetFrmUserLink)) />);
 
             // Folder
             @*this.Content.Add(@<Folders Parent="this" User="User" />);*@
 
-            this.Content.Add(@<IqOptionAccount Parent="this" User="User" />);
+            @*this.Content.Add(@<IqOptionAccount Parent="this" User="User" />);*@
         }
     }
 
@@ -79,6 +91,12 @@
     {
         this.Body = this.RenderBody();
         StateHasChanged();
+    }
+
+    public void SetFrmUserLink()
+    {
+        this.booFrmUserLink = true;
+        this.ReRenderBody();
     }
 
     private void UserInitialization()
@@ -115,7 +133,7 @@
         Console.WriteLine("Inicialização do usuário (base)...");
 
         this.booUserOnInitializeAsync = false;
-    
+
         try
         {
             if (this.User != null && !string.IsNullOrEmpty(this.User.Uuid.ToString()) && !string.IsNullOrWhiteSpace(this.User.Uuid.ToString()))
