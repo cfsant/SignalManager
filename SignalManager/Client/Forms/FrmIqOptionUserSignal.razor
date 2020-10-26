@@ -1,0 +1,215 @@
+﻿@using Crypto;
+
+@inherits Form<IqOptionAccount>
+@this.Body
+
+@code{
+    [Parameter]
+    public UserDomain User
+    {
+        get;
+        set;
+    }
+
+    public int Platform
+    {
+        get;
+        set;
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        base.OnInitializedAsync();
+
+        return Task.Run(() =>
+        {
+            this.Body = this.RenderBody();
+        });
+    }
+
+    protected override Task OnParametersSetAsync()
+    {
+        return base.OnParametersSetAsync();
+    }
+
+    protected override void LoadContent()
+    {
+        if (string.IsNullOrEmpty(this.Class) || string.IsNullOrWhiteSpace(this.Class))
+        {
+            this.Class = "d-flex flex-column w-100 align-self-center p-md-1 p-lg-1 p-xl-1";
+        }
+
+        this.OnModelLoad(this.Model);
+
+        this.Content = new Collection<RenderFragment>();
+        this.Content.Add(this.GetForm());
+    }
+
+    protected override void OnModelLoad(IqOptionAccount model)
+    {
+        base.OnModelLoad(model);
+
+        Bag bag = this.DataBag["MODEL_TO_EDIT"];
+        if (bag != null)
+        {
+            this.Model = ((IqOptionAccount)bag.Value);
+        }
+
+        this.Platform = (int)model.EnmPlatform;
+
+        this.DataBag.Remove(bag);
+    }
+
+    protected override Task<bool> OnModelPush(IqOptionAccount model)
+    {
+        return Task.Run<bool>(async () =>
+        {
+            if (this.Data.Count >= 1) return false;
+
+            this.Data.Add(model);
+
+            this.Model = new IqOptionAccount();
+            this.Platform = (int)model.EnmPlatform;
+
+            this.User.IqOptionEmail = model.Email;
+            this.User.IqOptionToken = new Cryptography(model.Password).Encode();
+
+            var lstUser = await this.PostWithTokenAsync<UserDomain>("User/UpdateOrInsertAsync", this.User, true);
+            if (lstUser == null || lstUser.Count < 1)
+            {
+                return false;
+            }
+
+            this.User = lstUser.First();
+            if (this.User == null || this.User.Uuid == null || this.User.Uuid == default)
+            {
+                return false;
+            }
+
+            return true;
+        });
+    }
+
+    protected override Task<bool> OnModelValidate(IqOptionAccount model)
+    {
+        if (model == null || model == default)
+        {
+            Toaster.Add("Informações inválidas.", MatToastType.Danger);
+            return Task.Run<bool>(() => { return false; });
+        }
+
+        if (string.IsNullOrEmpty(model.Email) || string.IsNullOrWhiteSpace(model.Email))
+        {
+            Toaster.Add("Email inválido.", MatToastType.Danger);
+            return Task.Run<bool>(() => { return false; });
+        }
+
+        if (string.IsNullOrEmpty(model.Password) || string.IsNullOrWhiteSpace(model.Password))
+        {
+            Toaster.Add("O campo \"Senha\" não pode ser vazio.", MatToastType.Danger);
+            return Task.Run<bool>(() => { return false; });
+        }
+
+        return Task.Run<bool>(() => { return true; });
+    }
+
+    protected override Task OnModelBindings(IqOptionAccount model)
+    {
+        model.EnmPlatform = (EnmPlatform)this.Platform;
+        model.EnmAccountType = EnmAccountType.TREINAMENTO;
+        return base.OnModelBindings(model);
+    }
+
+    private RenderFragment GetForm()
+    {
+        Base Container = new Base();
+        Container.Parent = this;
+        Container.Class = "d-flex flex-wrap justify-content-center w-100";
+        Container.Content = new Collection<RenderFragment>() {
+            this.GetUserInputContainer(Container),
+            this.GetCommitButtonContainer(Container)
+        };
+
+        return Container.RenderBody();
+    }
+
+    private RenderFragment GetUserInputContainer(Base Parent)
+    {
+        Base platformInputContainer = new Base();
+        platformInputContainer.Parent = Parent;
+        platformInputContainer.Class = "d-flex p-2 w-xl-25 w-lg-100 w-md-100 w-sm-100 justify-content-center";
+        platformInputContainer.Content = new Collection<RenderFragment>();
+
+        Base platformInputSubContainer = new Base();
+        platformInputSubContainer.Parent = platformInputContainer;
+        platformInputSubContainer.Class = "form-group w-100";
+
+        if (this.Model == null)
+        {
+            platformInputSubContainer.Content.Add(platformInputContainer.RenderBody());
+
+            return platformInputSubContainer.RenderBody();
+        }
+
+        Collection<RenderFragment> platformInputSubContainerContent = new Collection<RenderFragment>();
+        platformInputSubContainerContent.Add(@<Label Parent="@platformInputSubContainer" Class="w-100" For="pairInput" Text="Corretora:" />);
+        platformInputSubContainerContent.Add(this.GetUserInputField());
+
+        platformInputSubContainer.Content = platformInputSubContainerContent;
+        platformInputContainer.Content.Add(platformInputSubContainer.RenderBody());
+
+        return platformInputContainer.RenderBody();
+    }
+
+    private RenderFragment GetUserInputField()
+    {
+        return @<MatSelect Outlined="true" @bind-Value="@this.Platform" Class="w-100" Id="pairInput">
+         @foreach (RenderFragment option in this.GetUserInputFieldOptions())
+        {
+            @option
+        }
+        </MatSelect>;
+    }
+
+    private Collection<RenderFragment> GetUserInputFieldOptions()
+    {
+        Collection<RenderFragment> options = new Collection<RenderFragment>();
+
+        foreach (EnmPlatform platform in Enum.GetValues(typeof(EnmPlatform)))
+        {
+            options.Add(@<MatOption Value=@((int)platform) Class="w-100">@Enum.GetName(platform.GetType(), platform).Replace("_", " ")</MatOption>);
+        }
+
+        return options;
+    }
+
+    private RenderFragment GetCommitButtonContainer(Base Parent)
+    {
+        Base DateInputContainer = new Base();
+        DateInputContainer.Parent = Parent;
+        DateInputContainer.Class = "d-flex pt-xl-3 w-xl-25 w-lg-100 w-md-100 w-sm-100 align-items-center";
+        DateInputContainer.Style = "min-height:56px";
+        DateInputContainer.Content = new Collection<RenderFragment>()
+        {
+            this.GetButton()
+        };
+
+        return DateInputContainer.RenderBody();
+    }
+
+    private RenderFragment GetButton()
+    { 
+        return @<button id="@Guid.NewGuid().ToString()" class="btn btn-dark d-flex w-lg-100 w-md-100 w-sm-100 pt-3 pb-3 align-items-center justify-content-center" type="button" style="height: 56px; width: 56px;" @onclick="OnCommit">
+                    <span class="d-xl-none justify-content-center">Vincular</span>
+                    <MatIcon Icon="@MatIconNames.Add_circle" Class="d-none d-xl-flex d-lg-flex d-md-flex justify-content-center pl-xl-0 pl-lg-2 pl-md-2 pl-sm-3" />
+                </button>;
+    }
+
+    private void OnCommit()
+    {
+        Task.Run(async () =>
+        {
+            await this.OnFormSubmit(this.Model);
+        });
+    }
+}
