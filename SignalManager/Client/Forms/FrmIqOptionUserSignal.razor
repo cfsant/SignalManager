@@ -98,18 +98,6 @@
             return Task.Run<bool>(() => { return false; });
         }
 
-        if (string.IsNullOrEmpty(model.Email) || string.IsNullOrWhiteSpace(model.Email))
-        {
-            Toaster.Add("Email inválido.", MatToastType.Danger);
-            return Task.Run<bool>(() => { return false; });
-        }
-
-        if (string.IsNullOrEmpty(model.Password) || string.IsNullOrWhiteSpace(model.Password))
-        {
-            Toaster.Add("O campo \"Senha\" não pode ser vazio.", MatToastType.Danger);
-            return Task.Run<bool>(() => { return false; });
-        }
-
         return Task.Run<bool>(() => { return true; });
     }
 
@@ -163,8 +151,8 @@
 
     private RenderFragment GetUserInputField()
     {
-        return @<MatSelect Outlined="true" @bind-Value="@this.Platform" Class="w-100" Id="pairInput">
-         @foreach (RenderFragment option in this.GetUserInputFieldOptions())
+        return @<MatSelect Outlined="true" @bind-Value="@this.Platform" Class="w-100" Id="UserInput">
+        @foreach (RenderFragment option in this.GetUserInputFieldOptions())
         {
             @option
         }
@@ -175,10 +163,10 @@
     {
         Collection<RenderFragment> options = new Collection<RenderFragment>();
 
-        foreach (EnmPlatform platform in Enum.GetValues(typeof(EnmPlatform)))
+        @*foreach (UserDomain user in (this.DataBag.Get("sigmgmt_users") as List<UserDomain>))
         {
-            options.Add(@<MatOption Value=@((int)platform) Class="w-100">@Enum.GetName(platform.GetType(), platform).Replace("_", " ")</MatOption>);
-        }
+            options.Add(@<MatOption Value=@(user.Uuid) Class="w-100">@user.Email</MatOption>);
+        }*@
 
         return options;
     }
