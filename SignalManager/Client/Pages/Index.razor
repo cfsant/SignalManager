@@ -10,7 +10,13 @@
         set;
     }
 
-    private bool booFoldersOnInitializeAsync
+    private bool OpenFolder
+    {
+        get;
+        set;
+    }
+
+    private FolderDomain Folder 
     {
         get;
         set;
@@ -65,13 +71,20 @@
             // Cliente
             // this.Content.Add(@<Client Parent="this" User="User"/>);
 
+            if (this.OpenFolder)
+            {
+                this.Content.Add(@<Folder Parent="this" User="User" Model="Folder"/>);
+
+                return;
+            }
+
             // Admin
             @*this.Content.Add(@<Admin Parent = "this" User = "User" />);*@
 
             // Folder
-            @*this.Content.Add(@<Folders Parent="this" User="User" />);*@
+            this.Content.Add(@<Folders Parent="this" User="User" OnOpenFolder="OnOpenFolder" />);
 
-            this.Content.Add(@<IqOptionAccount Parent="this" User="User" />);
+            //this.Content.Add(@<IqOptionAccount Parent="this" User="User" />);
         }
     }
 
@@ -157,5 +170,13 @@
         {
             this.booUserOnInitializeAsync = true;
         }
+    }
+
+    private void OnOpenFolder(FolderDomain model)
+    {
+        this.Folder = model;
+        this.OpenFolder = true;
+
+        this.ReRenderBody();
     }
 }

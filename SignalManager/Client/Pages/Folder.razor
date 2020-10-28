@@ -1,0 +1,56 @@
+﻿@inherits Base
+
+@this.Body
+
+@code{
+    [Parameter]
+    public FolderDomain Model
+    {
+        get;
+        set;
+    }
+
+    [Parameter]
+    public UserDomain User
+    {
+        get;
+        set;
+    }
+
+    private bool HideFrm
+    {
+        get;
+        set;
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        base.OnInitializedAsync();
+
+        return Task.Run(() => {
+            this.Body = this.RenderBody();
+        });
+    }
+
+    protected override Task OnParametersSetAsync()
+    {
+        return base.OnParametersSetAsync();
+    }
+
+    protected override void LoadContent()
+    {
+        if (string.IsNullOrEmpty(this.Class) || string.IsNullOrWhiteSpace(this.Class))
+        {
+            this.Class = "d-flex flex-column w-100 align-self-center p-md-1 p-lg-1 p-xl-1";
+        }
+
+        this.Content = new Collection<RenderFragment>();
+        this.Content.Add(@<FrmSignal Parent=this OnFormSubmitCallBack=@(new Action(ReRenderBody)) User="User"/>);
+        this.Content.Add(@<GrdSignal Parent=this OnEditCallback=@(new Action(ReRenderBody)) OnRemoveCallback=@(new Action(ReRenderBody))/>);
+    }
+
+    private void OnFormSubmitCallBack()
+    {
+
+    }
+}

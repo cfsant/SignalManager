@@ -11,6 +11,13 @@
         set;
     }
 
+    [Parameter]
+    public Action<FolderDomain> OnOpenFolder
+    {
+        get;
+        set;
+    }
+
     [Inject]
     public DataController<FolderDomain> Controller
     {
@@ -67,7 +74,6 @@
     {
         await this.DataBag.ExecuteAsync(this.FoldersOnInitializeAsync(this.User));
         this.FoldersInitialization();
-
 
         this.Body = this.RenderBody();
     }
@@ -199,24 +205,20 @@
     {
         if (Link)
         {
-            return @<MatIconButton Icon="@MatIconNames.Settings" />;
-            //return @<MatIconButton Icon="@MatIconNames.Edit" OnClick=@(new Action(() => OnEdit(null, model))) />;
+            return @<MatIconButton Icon="@MatIconNames.Settings" OnClick=@(new Action(() => OnEditFolder(model)))/>;
         }
 
-        return @<Button Class="btn btn-dark w-100" Text="Configurações" />;
-        //return @<Button Class="btn btn-dark w-100" OnClick=@(new Action(() => OnEdit(null, model))) Text="Editar"/>;
+        return @<Button Class="btn btn-dark w-100" Text="Configurações" OnClick=@(new Action(() => OnEditFolder(model)))/>;
     }
 
     private RenderFragment GetRemoveControl(FolderDomain model, bool Link = false)
     {
         if (Link)
         {
-            return @<MatIconButton Icon="@MatIconNames.Delete" />;
-            //return @<MatIconButton Icon="@MatIconNames.Delete" OnClick=@(new Action(() => OnRemove(null, model)))/>;
+            return @<MatIconButton Icon="@MatIconNames.Delete" OnClick=@(new Action(() => OnRemovelFolder(model)))/>;
         }
 
-        return @<Button Class="btn btn-dark w-100" Text="Remover" />;
-        //return @<Button Class="btn btn-dark w-100" OnClick=@(new Action(() => OnRemove(null, model))) Text="Remover"/>;
+        return @<Button Class="btn btn-dark w-100" Text="Remover" OnClick=@(new Action(() => OnRemovelFolder(model)))/>;
     }
 
     private RenderFragment GetAddFolder()
@@ -371,13 +373,25 @@
         Console.WriteLine("AddFolderModalIsOpen: " + this.AddFolderModalIsOpen);
     }
 
+    private void OnEditFolder(FolderDomain model)
+    {
+        this.OnOpenFolder?.Invoke(model);
+    }
+
+    private void OnRemovelFolder(FolderDomain model)
+    {
+        //this.OnOpenFolder?.Invoke(model);
+    }
+
     private void OnModelUpdate(FolderDomain model)
     {
         this.AddFolderModalIsOpen = false;
 
         this.Controller.Add(model);
 
-        this.ReRenderBody();
+        this.OnOpenFolder?.Invoke(model);
+
+        //this.ReRenderBody();
     }
 
     private void OnModalCancelation(FolderDomain model)

@@ -23,16 +23,13 @@
 
             if (string.IsNullOrEmpty(this.Class) || string.IsNullOrWhiteSpace(this.Class))
             {
-                Console.WriteLine("Span text: " + this.Text);
-
                 this.Body = @<span id="@this.Uid">@this.Text</span>;
 
                 return;
             }
 
-            Console.WriteLine("Span text: " + this.Text);
-
             this.Body = @<span id="@this.Uid" class="@this.Class">@this.Text</span>;
+
         }));
 
         return this.Body;

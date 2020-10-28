@@ -71,11 +71,6 @@
     protected override void OnModelLoad()
     {
         base.OnModelLoad();
-
-        this.dttOperacao = this.Model.Date;
-        this.intAmout = this.Model.Amount;
-        this.intPair = ((int)this.Model.Pair);
-        this.intDirection = ((int)this.Model.Direction);
     }
 
     protected override Task<bool> OnModelValidate()
@@ -87,23 +82,9 @@
             return Task.Run<bool>(() => { return false; });
         }
 
-        if (this.Model.Date <= DateTime.Now)
+        if (this.Model.Entry <= DateTime.Now)
         {
             Console.WriteLine("Invalid 'DATE' value.");
-
-            return Task.Run<bool>(() => { return false; });
-        }
-
-        if (this.Model.Direction == Signal.Directions.UNDEFINED)
-        {
-            Console.WriteLine("Invalid 'DIRECTION' value.");
-
-            return Task.Run<bool>(() => { return false; });
-        }
-
-        if (this.Model.Pair == Signal.Pairs.UNDEFINED)
-        {
-            Console.WriteLine("Invalid 'PAIR' value.");
 
             return Task.Run<bool>(() => { return false; });
         }
@@ -113,10 +94,7 @@
 
     protected override Task OnModelBindings()
     {
-        this.Model.Date = this.dttOperacao.ToLocalTime();
-        this.Model.Amount = this.intAmout;
-        this.Model.Pair = ((Signal.Pairs)this.intPair);
-        this.Model.Direction = ((Signal.Directions)this.intDirection);
+        this.Model.Entry = this.Model.Entry.ToLocalTime();
 
         return base.OnModelBindings();
     }
@@ -215,9 +193,9 @@
     {
         Collection<RenderFragment> options = new Collection<RenderFragment>();
 
-        foreach (Signal.Pairs goal in Enum.GetValues(typeof(Signal.Pairs)))
+        foreach (Signal.EnmActivePair activePair in Enum.GetValues(typeof(Signal.EnmActivePair)))
         {
-            options.Add(@<MatOption Value=@((int)goal)>@Enum.GetName(goal.GetType(), goal)</MatOption>);
+            options.Add(@<MatOption Value=@((int)activePair)>@Enum.GetName(activePair.GetType(), activePair)</MatOption>);
         }
 
         return options;
@@ -258,7 +236,7 @@
     {
         Collection<RenderFragment> options = new Collection<RenderFragment>();
 
-        foreach (Signal.Directions direction in Enum.GetValues(typeof(Signal.Directions)))
+        foreach (Signal.EnmOrderDirection direction in Enum.GetValues(typeof(Signal.EnmOrderDirection)))
         {
             options.Add(@<MatOption Value=@((int)direction)>@Enum.GetName(direction.GetType(), direction)</MatOption>);
         }

@@ -1,7 +1,8 @@
-﻿@inherits Grid<Signal>
+﻿@inherits Grid<IqOptionAdminSignalDomain>
 @inject UserDomain User 
 
 @this.Body
+@this.LoadingSpinner
 
 @code {
     public bool SelectedAll
@@ -24,32 +25,53 @@
         set;
     }
 
-    protected override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
-        base.OnInitializedAsync();
-
         this.Class = "d-flex flex-row w-100 align-self-center mt-xl-2 mt-lg-2 p-2";
 
-        return Task.Run(() => {
-            //if (this.Data == null || this.Data.Count < 1)
-            //{
-            //    this.Data = new DataControler<Signal>()
-            //    {
-            //        new Signal()
-            //        {
-            //            Date = DateTime.Now.AddDays(1),
-            //            Duration = Signal.Durations.CINCO,
-            //            Pair = Signal.Pairs.AUDCAD,
-            //            Direction = Signal.Directions.CALL,
-            //            Amount = 10,
-            //            Martingale = 1,
-            //            MartingaleValue = 2
-            //        }
-            //    };
-            //}
+        await this.DataBag.ExecuteAsync(this.SignalOnInitializeAsync());
+        this.SignalInitialization();
 
-            this.Body = this.RenderBody();
-        });
+        this.Body = this.RenderBody();
+    }
+
+    private void SignalOnInitializeAsyncEvent(bool value)
+    {
+        try
+        {
+            this.LoadingSpinner = @<Spinner PVisible="!value"/>;
+        }
+        finally
+        {
+            this.StateHasChanged();
+        }
+    }
+
+    private RenderFragment LoadingSpinner
+    {
+        get;
+        set;
+    }
+
+    private bool _booSignalOnInitializeAsync;
+
+    private bool booSignalsOnInitializeAsync
+    {
+        get
+        {
+            return _booSignalOnInitializeAsync;
+        }
+        set
+        {
+            try
+            {
+                _booSignalOnInitializeAsync = value;
+            }
+            finally
+            {
+                this.SignalOnInitializeAsyncEvent(value);
+            }
+        }
     }
 
     public override Collection<RenderFragment> GetBase()
@@ -59,11 +81,6 @@
         BaseContainer.Class = "flex-column w-100 m-xl-1 m-lg-1 fnt-default-size-xl fnt-default-size-lg fnt-default-size-md fnt-default-size-sm";
         BaseContainer.Content = new Collection<RenderFragment>();
         BaseContainer.Content.Add(this.GetHeader(BaseContainer));
-
-        //if (User.LevelAccess == EnmLevelAccess.DEFAULT)
-        //{
-        //this.Create();
-        //}
 
         if (this.Data == null || this.Data.Count < 1)
         {
@@ -174,14 +191,19 @@
 
     public override Collection<RenderFragment> GetBody(Base Parent)
     {
+
         Collection<RenderFragment> Rows = new Collection<RenderFragment>();
         if (this.Data == null || this.Data.Count < 1)
         {
             return Rows;
         }
 
-        foreach (Signal model in this.Data.OrderBy(x => x.Date))
+        foreach (IqOptionAdminSignalDomain item in this.Data.OrderBy(x => x.Entry))
         {
+
+            Signal model = new Signal();
+            model = Utils.Parse<IqOptionAdminSignalDomain, Signal>(item, model);
+
             Base BodyContainer = new Base();
             BodyContainer.Parent = Parent;
             BodyContainer.Class = "d-inline-flex flex-row flex-wrap border-sm border-md border-lg tt-col-sm tt-col-md mt-2 w-100 min-sm-h-180";
@@ -206,7 +228,7 @@
             DateHOptionContainer.Parent = BodyContainer;
             DateHOptionContainer.Class = "col-xl-2 col-lg-2 col-md-6 col-sm-6 pt-xl-1 pt-lg-1";
             DateHOptionContainer.Content = new Collection<RenderFragment>() {
-                new Text() { Parent = DateHOptionContainer, Content = model.Date.ToString("dd/MM/yyyy HH:mm:ss") }.RenderBody()
+                new Text() { Parent = DateHOptionContainer, Content = model.Entry.ToString("dd/MM/yyyy HH:mm:ss") }.RenderBody()
             };
 
             RenderFragment DataHOptionLabel = @<Label For="@DateHOptionContainer.Uid" Class="d-block d-xl-none d-lg-none d-md-block d-sm-block col-md-6 col-sm-6 align-self-center" Text="Data:" Bold="true" Style="max-height:18px"/>;
@@ -215,7 +237,7 @@
             DurationHOptionContainer.Parent = BodyContainer;
             DurationHOptionContainer.Class = "col-xl-1 col-lg-1 col-md-3 col-sm-3 pt-xl-1 pt-lg-1 pl-xl-4 pl-lg-2";
             DurationHOptionContainer.Content = new Collection<RenderFragment>() {
-                new Text() { Parent = DurationHOptionContainer, Content = ((int)model.Duration).ToString(), Class="text-right text-xl-left text-lg-center" }.RenderBody()
+                new Text() { Parent = DurationHOptionContainer, Content = model.Exp.ToString(), Class="text-right text-xl-left text-lg-center" }.RenderBody()
             };
 
             RenderFragment DurationHOptionLabel = @<Label For="@DurationHOptionContainer.Uid" Class="d-block d-xl-none d-lg-none d-md-block d-sm-block col-md-3 col-sm-3 align-self-center" Text="Duração:" Bold="true" Style="max-height:18px"/>;
@@ -242,12 +264,12 @@
             TagsHOptionContainer.Class = "col-xl-5 col-lg54 col-md-10 col-sm-10 pt-xl-1 pt-lg-1 text-xl-center text-lg-center";
             TagsHOptionContainer.Content = new Collection<RenderFragment>();
 
-            TagsHOptionContainer.Content.Add(@<MatChip Label="@model.PairName" Class="bg-info text-white"/>);
-            TagsHOptionContainer.Content.Add(@<MatChip Label="@model.DirectionName" Class=@(model.Direction == Signal.Directions.PUT ? "bg-success text-white" : "bg-danger text-white") />);
+            TagsHOptionContainer.Content.Add(@<MatChip Label="@(Enum.GetName(typeof(IqOptionAdminSignalDomain.EnmActivePair), model.ActivePair))" Class="bg-info text-white"/>);
+            TagsHOptionContainer.Content.Add(@<MatChip Label="@(Enum.GetName(typeof(IqOptionAdminSignalDomain.EnmOrderDirection), model.OrderDirection))" Class=@(((IqOptionAdminSignalDomain.EnmOrderDirection)model.OrderDirection) == IqOptionAdminSignalDomain.EnmOrderDirection.Put ? "bg-success text-white" : "bg-danger text-white") />);
 
-            if (model.Martingale > 0)
+            if (model.MartinGaleCount > 0)
             {
-                TagsHOptionContainer.Content.Add(@<MatChip Label="@string.Format("{0}x — R${1}", model.Martingale.ToString(), model.MartingaleValue.ToString("N2"))" Class="bg-primary text-white"/>);
+                TagsHOptionContainer.Content.Add(@<MatChip Label="@string.Format("{0}x — R${1}", model.MartinGaleCount, model.MartinGale.ToString("N2"))" Class="bg-primary text-white"/>);
             }
 
             RenderFragment TagsHOptionLabel = @<Label For="@TagsHOptionContainer.Uid" Class="d-block d-xl-none d-lg-none d-md-block d-sm-block col-md-2 col-sm-2 align-self-top pt-1" Text="Tags:" Bold="true" Style="max-height:18px"/>;
@@ -373,7 +395,7 @@
 
     private void OnModelUpdate(Signal model)
     {
-        this.Data.Update(model, model.Uid);
+        this.Data.Update(model, model.Uuid.ToString());
 
         this.ReRenderBody();
     }
@@ -383,25 +405,81 @@
         this.ReRenderBody();
     }
 
-    private void Create()
+    private void SignalInitialization()
     {
-        if (Data != null && Data.Count > 0)
+        while (!this.booSignalsOnInitializeAsync)
         {
+            System.Threading.Thread.Sleep(10);
+        }
+
+        Console.Write("Inicialização dos sinais do administrador (page)...");
+
+        List<IqOptionAdminSignalDomain> lstSignal = this.DataBag.Get("sigmgmt_signals_adm") as List<IqOptionAdminSignalDomain>;
+        if (lstSignal == null || lstSignal.Count < 1)
+        {
+            this.Data = new DataController<IqOptionAdminSignalDomain>();
+
             return;
         }
 
-        int intAmount = 1;
-        int intMinutes = 10;
+        Console.WriteLine("OK");
 
-        Console.WriteLine("Create...");
-
-        this.Data.Add(new Signal() { Uid = Guid.NewGuid().ToString(), Date = DateTime.Now.AddMinutes(++intMinutes), Amount = ++intAmount, Pair = Signal.Pairs.AUDCAD, Direction = Signal.Directions.PUT });
-        this.Data.Add(new Signal() { Uid = Guid.NewGuid().ToString(), Date = DateTime.Now.AddMinutes(++intMinutes), Amount = ++intAmount, Pair = Signal.Pairs.AUDCHF, Direction = Signal.Directions.CALL });
-        this.Data.Add(new Signal() { Uid = Guid.NewGuid().ToString(), Date = DateTime.Now.AddMinutes(++intMinutes), Amount = ++intAmount, Pair = Signal.Pairs.AUDJPY, Direction = Signal.Directions.PUT });
-        this.Data.Add(new Signal() { Uid = Guid.NewGuid().ToString(), Date = DateTime.Now.AddMinutes(++intMinutes), Amount = ++intAmount, Pair = Signal.Pairs.AUDNOK, Direction = Signal.Directions.CALL });
-        this.Data.Add(new Signal() { Uid = Guid.NewGuid().ToString(), Date = DateTime.Now.AddMinutes(++intMinutes), Amount = ++intAmount, Pair = Signal.Pairs.AUDNZD, Direction = Signal.Directions.PUT });
-        this.Data.Add(new Signal() { Uid = Guid.NewGuid().ToString(), Date = DateTime.Now.AddMinutes(++intMinutes), Amount = ++intAmount, Pair = Signal.Pairs.AUDSEK, Direction = Signal.Directions.CALL });
-        this.Data.Add(new Signal() { Uid = Guid.NewGuid().ToString(), Date = DateTime.Now.AddMinutes(++intMinutes), Amount = ++intAmount, Pair = Signal.Pairs.AUDSGD, Direction = Signal.Directions.PUT });
-        this.Data.Add(new Signal() { Uid = Guid.NewGuid().ToString(), Date = DateTime.Now.AddMinutes(++intMinutes), Amount = ++intAmount, Pair = Signal.Pairs.AUDUSD, Direction = Signal.Directions.CALL });
+        this.Data.AddRange(lstSignal);
     }
+
+    private async Task SignalOnInitializeAsync()
+    {
+        Console.WriteLine("Inicialização dos sinais do administrador (base)...");
+
+        this.booSignalsOnInitializeAsync = false;
+        UserDomain User = null;
+
+        try
+        {
+            if (User == null || string.IsNullOrEmpty(User.Uuid.ToString()) || string.IsNullOrWhiteSpace(User.Uuid.ToString()))
+            {
+                Console.WriteLine("Skipped.");
+
+                return;
+            }
+
+            var lstSignal = await this.PostWithTokenAsync<IqOptionAdminSignalDomain>("Signal/FetchAllAsync", new IqOptionAdminSignalDomain() { UuidUser = User.Uuid }, true);
+            if (lstSignal == null && lstSignal.Count < 1)
+            {
+
+                Console.WriteLine("Sem sinais do administrador..");
+
+                return;
+            }
+
+            this.DataBag.Set(new Bag("sigmgmt_signals_adm", lstSignal));
+            Console.WriteLine("Sinais do administrador recuperados com sucesso.");
+        }
+        finally
+        {
+            this.booSignalsOnInitializeAsync = true;
+        }
+    }
+
+    //private void Create()
+    //{
+    //    if (Data != null && Data.Count > 0)
+    //    {
+    //        return;
+    //    }
+
+    //    int intAmount = 1;
+    //    int intMinutes = 10;
+
+    //    Console.WriteLine("Create...");
+
+    //    this.Data.Add(new Signal() { Uid = Guid.NewGuid().ToString(), Date = DateTime.Now.AddMinutes(++intMinutes), Amount = ++intAmount, Pair = Signal.Pairs.AUDCAD, Direction = Signal.Directions.PUT });
+    //    this.Data.Add(new Signal() { Uid = Guid.NewGuid().ToString(), Date = DateTime.Now.AddMinutes(++intMinutes), Amount = ++intAmount, Pair = Signal.Pairs.AUDCHF, Direction = Signal.Directions.CALL });
+    //    this.Data.Add(new Signal() { Uid = Guid.NewGuid().ToString(), Date = DateTime.Now.AddMinutes(++intMinutes), Amount = ++intAmount, Pair = Signal.Pairs.AUDJPY, Direction = Signal.Directions.PUT });
+    //    this.Data.Add(new Signal() { Uid = Guid.NewGuid().ToString(), Date = DateTime.Now.AddMinutes(++intMinutes), Amount = ++intAmount, Pair = Signal.Pairs.AUDNOK, Direction = Signal.Directions.CALL });
+    //    this.Data.Add(new Signal() { Uid = Guid.NewGuid().ToString(), Date = DateTime.Now.AddMinutes(++intMinutes), Amount = ++intAmount, Pair = Signal.Pairs.AUDNZD, Direction = Signal.Directions.PUT });
+    //    this.Data.Add(new Signal() { Uid = Guid.NewGuid().ToString(), Date = DateTime.Now.AddMinutes(++intMinutes), Amount = ++intAmount, Pair = Signal.Pairs.AUDSEK, Direction = Signal.Directions.CALL });
+    //    this.Data.Add(new Signal() { Uid = Guid.NewGuid().ToString(), Date = DateTime.Now.AddMinutes(++intMinutes), Amount = ++intAmount, Pair = Signal.Pairs.AUDSGD, Direction = Signal.Directions.PUT });
+    //    this.Data.Add(new Signal() { Uid = Guid.NewGuid().ToString(), Date = DateTime.Now.AddMinutes(++intMinutes), Amount = ++intAmount, Pair = Signal.Pairs.AUDUSD, Direction = Signal.Directions.CALL });
+    //}
 }

@@ -1,26 +1,8 @@
-﻿@inherits Form<Signal>
+﻿@inherits Form<IqOptionAdminSignalDomain>
 
 @this.Body
 
 @code{
-    public int intDuration
-    {
-        get;
-        set;
-    }
-
-    public int intPair
-    {
-        get;
-        set;
-    }
-
-    public int intDirection
-    {
-        get;
-        set;
-    }
-
     protected override Task OnInitializedAsync()
     {
         base.OnInitializedAsync();
@@ -28,11 +10,6 @@
         return Task.Run(() => {
             this.Body = this.RenderBody();
         });
-    }
-
-    protected override Task OnParametersSetAsync()
-    {
-        return base.OnParametersSetAsync();
     }
 
     protected override void LoadContent()
@@ -48,41 +25,44 @@
         this.Content.Add(this.GetForm());
     }
 
-    protected override void OnModelLoad(Signal model)
+    protected override void OnModelLoad(IqOptionAdminSignalDomain model)
     {
         base.OnModelLoad(model);
 
         Bag bag = this.DataBag["MODEL_TO_EDIT"];
         if (bag != null)
         {
-            this.Model = ((Signal)bag.Value);
+            this.Model = ((IqOptionAdminSignalDomain)bag.Value);
         }
 
-        Console.WriteLine(string.Format("Duration (Carga): {0};", Enum.GetName(typeof(Signal.Durations), this.Model.Duration)));
-
-        this.intDuration = ((int)this.Model.Duration);
-        this.intPair = ((int)this.Model.Pair);
-        this.intDirection = ((int)this.Model.Direction);
-
         this.DataBag.Remove(bag);
-
     }
 
-    protected override Task<bool> OnModelPush(Signal model)
+    protected override Task<bool> OnModelPush(IqOptionAdminSignalDomain model)
     {
-        return Task.Run<bool>(() => {
+        return Task.Run<bool>(async () => {
+
+            var lstResult = await this.PostWithTokenAsync<IqOptionAdminSignalDomain>("Signal/UpdateOrInsertInto", model);
+            if (lstResult == null || lstResult.Count < 1)
+            {
+                return false;
+            }
+
+            model = lstResult.Single();
+            if (model == null || string.IsNullOrEmpty(model.Uuid.ToString()) || string.IsNullOrWhiteSpace(model.Uuid.ToString()))
+            {
+                return false;
+            }
+
             this.Data.Add(model);
 
-            this.Model = new Signal();
-            this.intDuration = ((int)this.Model.Duration);
-            this.intPair = ((int)this.Model.Pair);
-            this.intDirection = ((int)this.Model.Direction);
+            this.Model = new IqOptionAdminSignalDomain();
 
             return true;
         });
     }
 
-    protected override Task<bool> OnModelValidate(Signal model)
+    protected override Task<bool> OnModelValidate(IqOptionAdminSignalDomain model)
     {
         if (model == null || model == default)
         {
@@ -91,23 +71,9 @@
             return Task.Run<bool>(() => { return false; });
         }
 
-        if (model.Date <= DateTime.Now)
+        if (model.Entry <= DateTime.Now)
         {
             Console.WriteLine("Invalid 'DATE' value.");
-
-            return Task.Run<bool>(() => { return false; });
-        }
-
-        if (model.Direction == Signal.Directions.UNDEFINED)
-        {
-            Console.WriteLine("Invalid 'DIRECTION' value.");
-
-            return Task.Run<bool>(() => { return false; });
-        }
-
-        if (model.Pair == Signal.Pairs.UNDEFINED)
-        {
-            Console.WriteLine("Invalid 'PAIR' value.");
 
             return Task.Run<bool>(() => { return false; });
         }
@@ -115,12 +81,11 @@
         return Task.Run<bool>(() => { return true; });
     }
 
-    protected override Task OnModelBindings(Signal model)
+    protected override Task OnModelBindings(IqOptionAdminSignalDomain model)
     {
-        model.Date = model.Date.ToLocalTime();
-        model.Duration = ((Signal.Durations)this.intDuration);
-        model.Pair = ((Signal.Pairs)this.intPair);
-        model.Direction = ((Signal.Directions)this.intDirection);
+        model.Entry = model.Entry.ToLocalTime();
+        model.UuidUser = this.User?.Uuid;
+        model.User = this.User;
 
         return base.OnModelBindings(model);
     }
@@ -140,31 +105,6 @@
             this.GetMartinGaleValueInputContainer(Container),
             this.GetCommitButtonContainer(Container)
         };
-
-        //Base Row1 = new Base();
-        //Row1.Parent = Container;
-        //Row1.Class = "d-flex flex-row w-100";
-        //Row1.Content = new Collection<RenderFragment>()
-        //{
-        //    this.GetDateInputContainer(Container),
-        //    this.GetDurationInputContainer(Container),
-        //    this.GetPairInputContainer(Container),
-        //    this.GetDirectionInputContainer(Container)
-        //};
-
-        //Base Row2 = new Base();
-        //Row2.Parent = Container;
-        //Row2.Class = "d-flex flex-row w-100";
-        //Row2.Content = new Collection<RenderFragment>()
-        //{
-        //    this.GetAmountInputContainer(Container),
-        //    this.GetMartinGaleInputContainer(Container),
-        //    this.GetMartinGaleValueInputContainer(Container),
-        //    this.GetCommitButtonContainer(Container)
-        //};
-
-        //Container.Content.Add(Row1.RenderBody());
-        //Container.Content.Add(Row2.RenderBody());
 
         return Container.RenderBody();
     }
@@ -189,7 +129,7 @@
 
         Collection<RenderFragment> DateInputSubContainerContent = new Collection<RenderFragment>();
         DateInputSubContainerContent.Add(@<Label Parent="@DateInputSubContainer" For="dateInput" Text="Data:"/>);
-        DateInputSubContainerContent.Add(@<MatDatePicker Outlined="true" TValue="DateTime" Enable24hours="true" EnableSeconds="true" Format="dd/MM/yyyy HH:mm:ss" EnableTime="true" @bind-Value="@this.Model.Date" Class="w-100" Id="dateInput"/>);
+        DateInputSubContainerContent.Add(@<MatDatePicker Outlined="true" TValue="DateTime" Enable24hours="true" EnableSeconds="true" Format="dd/MM/yyyy HH:mm:ss" EnableTime="true" @bind-Value="@this.Model.Entry" Class="w-100" Id="dateInput"/>);
 
         DateInputSubContainer.Content = DateInputSubContainerContent;
 
@@ -200,8 +140,6 @@
 
     private RenderFragment GetDurationInputContainer(Base Parent)
     {
-        Console.WriteLine(string.Format("Duration (Geração): {0} — {1};", Enum.GetName(typeof(Signal.Durations), this.Model.Duration), this.intDuration));
-
         Base DurationInputContainer = new Base();
         DurationInputContainer.Parent = Parent;
         DurationInputContainer.Class = "d-flex p-2 w-xl-25 w-lg-100 w-md-100 w-sm-100 justify-content-center";
@@ -219,7 +157,7 @@
         }
 
         Collection<RenderFragment> IntervalInputSubContainerContent = new Collection<RenderFragment>();
-        IntervalInputSubContainerContent.Add(@<Label Parent="@DurationInputSubContainer" Class="w-100" For="durationInput" Text="Duração:"/>);
+        IntervalInputSubContainerContent.Add(@<Label Parent="@DurationInputSubContainer" Class="w-100" For="expInput" Text="Duração:"/>);
         IntervalInputSubContainerContent.Add(this.GetDurationInputField());
 
         DurationInputSubContainer.Content = IntervalInputSubContainerContent;
@@ -231,7 +169,7 @@
 
     private RenderFragment GetDurationInputField()
     {
-        return @<MatSelect Outlined="true" @bind-Value="@this.intDuration" Class="w-100" Id="durationInput">
+        return @<MatSelect TValue="int" Outlined="true" @bind-Value="@this.Model.Exp" Class="w-100" Id="expInput">
                     @foreach (RenderFragment option in this.GetDurationInputFieldOptions())
                     {
                         @option
@@ -243,9 +181,9 @@
     {
         Collection<RenderFragment> options = new Collection<RenderFragment>();
 
-        foreach (Signal.Durations duration in Enum.GetValues(typeof(Signal.Durations)))
+        foreach (IqOptionAdminSignalDomain.EnmExp exp in Enum.GetValues(typeof(IqOptionAdminSignalDomain.EnmExp)))
         {
-            options.Add(@<MatOption Value=@((int)duration) Class="w-100">@((int)duration)</MatOption>);
+            options.Add(@<MatOption TValue="int" Value=@((int)exp) Class="w-100">@(((int)exp).ToString())</MatOption>);
         }
 
         return options;
@@ -271,7 +209,7 @@
 
         Collection<RenderFragment> AmountInputSubContainerContent = new Collection<RenderFragment>();
         AmountInputSubContainerContent.Add(@<Label Parent="@AmountInputSubContainer" For="amountInput" Text="Valor:"/>);
-        AmountInputSubContainerContent.Add(@<MatNumericUpDownField @bind-Value="@this.Model.Amount" Outlined="true" FieldType="MatNumericUpDownFieldType.Currency" DecimalPlaces=2 Class="w-100" Id="amountInput" />);
+        AmountInputSubContainerContent.Add(@<MatNumericUpDownField TValue="int" @bind-Value="@this.Model.Amount" Outlined="true" FieldType="MatNumericUpDownFieldType.Currency" DecimalPlaces=2 Class="w-100" Id="amountInput" />);
 
         AmountInputSubContainer.Content = AmountInputSubContainerContent;
 
@@ -300,7 +238,7 @@
 
         Collection<RenderFragment> MartinGaleInputSubContainerContent = new Collection<RenderFragment>();
         MartinGaleInputSubContainerContent.Add(@<Label Parent="@MartinGaleSubContainer" For="martingaleInput" Text="Martingale:"/>);
-        MartinGaleInputSubContainerContent.Add(@<MatNumericUpDownField @bind-Value="@this.Model.Martingale" Outlined="true" FieldType="MatNumericUpDownFieldType.Numeric" DecimalPlaces=2 Class="w-100" Id="martingaleInput" />);
+        MartinGaleInputSubContainerContent.Add(@<MatNumericUpDownField TValue="int" @bind-Value="@this.Model.MartinGaleCount" Outlined="true" FieldType="MatNumericUpDownFieldType.Numeric" DecimalPlaces=2 Class="w-100" Id="martingaleInput" />);
 
         MartinGaleSubContainer.Content = MartinGaleInputSubContainerContent;
 
@@ -329,7 +267,7 @@
 
         Collection<RenderFragment> AmountInputSubContainerContent = new Collection<RenderFragment>();
         AmountInputSubContainerContent.Add(@<Label Parent="@MartinGaleValueInputSubContainer" For="martingaleValueInput" Text="Martingale(R$):"/>);
-        AmountInputSubContainerContent.Add(@<MatNumericUpDownField @bind-Value="@this.Model.MartingaleValue" Outlined="true" FieldType="MatNumericUpDownFieldType.Currency" DecimalPlaces=2 Class="w-100" Id="martingaleValueInput" />);
+        AmountInputSubContainerContent.Add(@<MatNumericUpDownField TValue="decimal" @bind-Value="@this.Model.MartinGale" Outlined="true" FieldType="MatNumericUpDownFieldType.Currency" DecimalPlaces=2 Class="w-100" Id="martingaleValueInput" />);
 
         MartinGaleValueInputSubContainer.Content = AmountInputSubContainerContent;
 
@@ -369,7 +307,7 @@
 
     private RenderFragment GetPairInputField()
     {
-        return @<MatSelect Outlined="true" @bind-Value="@this.intPair" Class="w-100" Id="pairInput">
+        return @<MatSelect TValue="int" Outlined="true" @bind-Value="@this.Model.ActivePair" Class="w-100" Id="pairInput">
                     @foreach (RenderFragment option in this.GetPairInputFieldOptions())
                     {
                         @option
@@ -381,9 +319,9 @@
     {
         Collection<RenderFragment> options = new Collection<RenderFragment>();
 
-        foreach (Signal.Pairs goal in Enum.GetValues(typeof(Signal.Pairs)))
+        foreach (IqOptionAdminSignalDomain.EnmActivePair activePair in Enum.GetValues(typeof(IqOptionAdminSignalDomain.EnmActivePair)))
         {
-            options.Add(@<MatOption Value=@((int)goal) Class="w-100">@Enum.GetName(goal.GetType(), goal)</MatOption>);
+            options.Add(@<MatOption Value=@((int)activePair) Class="w-100">@Enum.GetName(activePair.GetType(), activePair)</MatOption>);
         }
 
         return options;
@@ -420,7 +358,7 @@
 
     private RenderFragment GetDirectionInputField()
     {
-        return @<MatSelect Outlined="true" @bind-Value="@this.intDirection" Class="w-100" Id="directionInput">
+        return @<MatSelect Outlined="true" @bind-Value="@this.Model.OrderDirection" Class="w-100" Id="directionInput">
                     @foreach (RenderFragment option in this.GetDirectionInputFieldOptions())
                     {
                         @option
@@ -432,9 +370,9 @@
     {
         Collection<RenderFragment> options = new Collection<RenderFragment>();
 
-        foreach (Signal.Directions direction in Enum.GetValues(typeof(Signal.Directions)))
+        foreach (IqOptionAdminSignalDomain.EnmOrderDirection orderDirection in Enum.GetValues(typeof(IqOptionAdminSignalDomain.EnmOrderDirection)))
         {
-            options.Add(@<MatOption Value=@((int)direction)>@Enum.GetName(direction.GetType(), direction)</MatOption>);
+            options.Add(@<MatOption Value=@((int)orderDirection)>@Enum.GetName(orderDirection.GetType(), orderDirection)</MatOption>);
         }
 
         return options;

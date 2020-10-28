@@ -27,9 +27,11 @@ namespace SignalManager.Client
             builder.Services.AddSingleton<UserDomain>();
             builder.Services.AddSingleton<FolderDomain>();
             builder.Services.AddSingleton<IqOptionAccount>();
+            builder.Services.AddSingleton<IqOptionAdminSignalDomain>();
             builder.Services.AddSingleton<Signal>();
             builder.Services.AddSingleton<DataController<UserDomain>>();
             builder.Services.AddSingleton<DataController<IqOptionAccount>>();
+            builder.Services.AddSingleton<DataController<IqOptionAdminSignalDomain>>();
             builder.Services.AddSingleton<DataController<FolderDomain>>();
             builder.Services.AddSingleton<DataController<Signal>>();
             builder.Services.AddSingleton<CookieManager>(new CookieManager(
