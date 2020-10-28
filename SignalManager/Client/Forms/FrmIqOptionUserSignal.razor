@@ -17,13 +17,6 @@
         set;
     }
 
-    public int AccountType
-    {
-        get;
-        set;
-    }
-
-  
     protected override Task OnInitializedAsync()
     {
         base.OnInitializedAsync();
@@ -65,7 +58,6 @@
         this.Platform = (int)model.EnmPlatform;
 
         this.DataBag.Remove(bag);
-
     }
 
     protected override Task<bool> OnModelPush(IqOptionAccount model)
@@ -78,11 +70,9 @@
 
             this.Model = new IqOptionAccount();
             this.Platform = (int)model.EnmPlatform;
-            this.AccountType = (int)model.EnmAccountType;
 
             this.User.IqOptionEmail = model.Email;
             this.User.IqOptionToken = new Cryptography(model.Password).Encode();
-            this.User.IqOptionAccountType = this.GetAccountType();
 
             var lstUser = await this.PostWithTokenAsync<UserDomain>("User/UpdateOrInsertAsync", this.User, true);
             if (lstUser == null || lstUser.Count < 1)
@@ -100,39 +90,11 @@
         });
     }
 
-    private string GetAccountType(string accountType = default)
-    {
-        if (accountType != default)
-        {
-            if ("PRATICE".Equals(accountType)) return "TREINAMENTO";
-            return accountType;
-        }
-
-        switch (this.AccountType)
-        {
-            case 1: return "PRATICE";
-            case 2: return "REAL";
-            default: return "PRATICE";
-        }
-    }
-
     protected override Task<bool> OnModelValidate(IqOptionAccount model)
     {
         if (model == null || model == default)
         {
             Toaster.Add("Informações inválidas.", MatToastType.Danger);
-            return Task.Run<bool>(() => { return false; });
-        }
-
-        if (string.IsNullOrEmpty(model.Email) || string.IsNullOrWhiteSpace(model.Email))
-        {
-            Toaster.Add("Email inválido.", MatToastType.Danger);
-            return Task.Run<bool>(() => { return false; });
-        }
-
-        if (string.IsNullOrEmpty(model.Password) || string.IsNullOrWhiteSpace(model.Password))
-        {
-            Toaster.Add("O campo \"Senha\" não pode ser vazio.", MatToastType.Danger);
             return Task.Run<bool>(() => { return false; });
         }
 
@@ -152,69 +114,14 @@
         Container.Parent = this;
         Container.Class = "d-flex flex-wrap justify-content-center w-100";
         Container.Content = new Collection<RenderFragment>() {
-            this.GetPlatformInputContainer(Container),
-            this.GetEmailInputContainer(Container),
-            this.GetPasswordInputContainer(Container),
+            this.GetUserInputContainer(Container),
             this.GetCommitButtonContainer(Container)
         };
 
         return Container.RenderBody();
     }
 
-    private RenderFragment GetEmailInputContainer(Base Parent)
-    {
-        Base emailInputContainer = new Base();
-        emailInputContainer.Parent = Parent;
-        emailInputContainer.Class = "d-flex p-2 w-xl-25 w-lg-100 w-md-100 w-sm-100 justify-content-center";
-        emailInputContainer.Content = new Collection<RenderFragment>();
-
-        Base emailSubContainer = new Base();
-        emailSubContainer.Parent = emailInputContainer;
-        emailSubContainer.Class = "form-group w-100";
-
-        if (this.Model == null)
-        {
-            emailInputContainer.Content.Add(emailSubContainer.RenderBody());
-            return emailInputContainer.RenderBody();
-        }
-
-        Collection<RenderFragment> emailInputSubContainerContent = new Collection<RenderFragment>();
-        emailInputSubContainerContent.Add(@<Label Parent="@emailSubContainer" For="emailInput" Text="Email:" />);
-        emailInputSubContainerContent.Add(@<MatTextField Outlined="true" TValue="string" @bind-Value="@this.Model.Email" Class="w-100" Id="emailInput"/>);
-
-        emailSubContainer.Content = emailInputSubContainerContent;
-        emailInputContainer.Content.Add(emailSubContainer.RenderBody());
-        return emailInputContainer.RenderBody();
-    }
-
-    private RenderFragment GetPasswordInputContainer(Base Parent)
-    {
-        Base passwordInputContainer = new Base();
-        passwordInputContainer.Parent = Parent;
-        passwordInputContainer.Class = "d-flex p-2 w-xl-25 w-lg-100 w-md-100 w-sm-100 justify-content-center";
-        passwordInputContainer.Content = new Collection<RenderFragment>();
-
-        Base passwordInputSubContainer = new Base();
-        passwordInputSubContainer.Parent = passwordInputContainer;
-        passwordInputSubContainer.Class = "form-group w-100";
-
-        if (this.Model == null)
-        {
-            passwordInputContainer.Content.Add(passwordInputSubContainer.RenderBody());
-            return passwordInputContainer.RenderBody();
-        }
-
-        Collection<RenderFragment> passwordInputSubContainerContent = new Collection<RenderFragment>();
-        passwordInputSubContainerContent.Add(@<Label Parent="@passwordInputSubContainer" For="passwordInput" Text="Senha:" />);
-        passwordInputSubContainerContent.Add(@<MatTextField Outlined="true" TValue="string" @bind-Value="@this.Model.Password" Type="password" Class="w-100" Id="passwordInput"/>);
-
-        passwordInputSubContainer.Content = passwordInputSubContainerContent;
-        passwordInputContainer.Content.Add(passwordInputSubContainer.RenderBody());
-
-        return passwordInputContainer.RenderBody();
-    }
-
-    private RenderFragment GetPlatformInputContainer(Base Parent)
+    private RenderFragment GetUserInputContainer(Base Parent)
     {
         Base platformInputContainer = new Base();
         platformInputContainer.Parent = Parent;
@@ -234,7 +141,7 @@
 
         Collection<RenderFragment> platformInputSubContainerContent = new Collection<RenderFragment>();
         platformInputSubContainerContent.Add(@<Label Parent="@platformInputSubContainer" Class="w-100" For="pairInput" Text="Corretora:" />);
-        platformInputSubContainerContent.Add(this.GetPlatformInputField());
+        platformInputSubContainerContent.Add(this.GetUserInputField());
 
         platformInputSubContainer.Content = platformInputSubContainerContent;
         platformInputContainer.Content.Add(platformInputSubContainer.RenderBody());
@@ -242,24 +149,24 @@
         return platformInputContainer.RenderBody();
     }
 
-    private RenderFragment GetPlatformInputField()
+    private RenderFragment GetUserInputField()
     {
-        return @<MatSelect Outlined="true" @bind-Value="@this.Platform" Class="w-100" Id="pairInput">
-         @foreach (RenderFragment option in this.GetPlatformInputFieldOptions())
+        return @<MatSelect Outlined="true" @bind-Value="@this.Platform" Class="w-100" Id="UserInput">
+        @foreach (RenderFragment option in this.GetUserInputFieldOptions())
         {
             @option
         }
         </MatSelect>;
     }
 
-    private Collection<RenderFragment> GetPlatformInputFieldOptions()
+    private Collection<RenderFragment> GetUserInputFieldOptions()
     {
         Collection<RenderFragment> options = new Collection<RenderFragment>();
 
-        foreach (EnmPlatform platform in Enum.GetValues(typeof(EnmPlatform)))
+        @*foreach (UserDomain user in (this.DataBag.Get("sigmgmt_users") as List<UserDomain>))
         {
-            options.Add(@<MatOption Value=@((int)platform) Class="w-100">@Enum.GetName(platform.GetType(), platform).Replace("_", " ")</MatOption>);
-        }
+            options.Add(@<MatOption Value=@(user.Uuid) Class="w-100">@user.Email</MatOption>);
+        }*@
 
         return options;
     }
@@ -268,7 +175,7 @@
     {
         Base DateInputContainer = new Base();
         DateInputContainer.Parent = Parent;
-        DateInputContainer.Class = "d-flex p-2 pt-xl-3 w-xl-25 w-lg-100 w-md-100 w-sm-100 justify-content-end align-items-center";
+        DateInputContainer.Class = "d-flex pt-xl-3 w-xl-25 w-lg-100 w-md-100 w-sm-100 align-items-center";
         DateInputContainer.Style = "min-height:56px";
         DateInputContainer.Content = new Collection<RenderFragment>()
         {

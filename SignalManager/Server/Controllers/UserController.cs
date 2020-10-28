@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Model;
 using Model.Base.Middleware;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -22,24 +21,42 @@ namespace SignalManager.Server.Controllers
         [HttpPost]
         public async Task<MiddlewareDomain<UserDomain>> LoginAsync([FromBody] MiddlewareDomain<UserDomain> middleware)
         {
-            if (middleware == null ||
-                string.IsNullOrEmpty(middleware.Objs.First().Email) || string.IsNullOrWhiteSpace(middleware.Objs.First().Email) ||
-                string.IsNullOrEmpty(middleware.Objs.First().Password) || string.IsNullOrWhiteSpace(middleware.Objs.First().Password)) return null;
+            return await this.Http.PostJsonAsync<MiddlewareDomain<UserDomain>>("https://localhost:8080/user/login_async", middleware);
+        }
 
-            middleware = await this.Http.PostJsonAsync<MiddlewareDomain<UserDomain>>("https://localhost:8080/user/login_async", middleware);
+        [Microsoft.AspNetCore.Mvc.Route("FetchAsync")]
+        [HttpPost]
+        public async Task<MiddlewareDomain<UserDomain>> FetchAsync([FromBody] MiddlewareDomain<UserDomain> middleware)
+        {
+            return await this.Http.PostJsonAsync<MiddlewareDomain<UserDomain>>("https://localhost:8080/user/fetch_async", middleware);
+        }
 
-            return middleware;
+        [Microsoft.AspNetCore.Mvc.Route("FetchAllAsync")]
+        [HttpPost]
+        public async Task<MiddlewareDomain<UserDomain>> FetchAllAsync([FromBody] MiddlewareDomain<UserDomain> middleware)
+        {
+            return await this.Http.PostJsonAsync<MiddlewareDomain<UserDomain>>("https://localhost:8080/user/fetch_all_async", middleware);
+        }
+
+        [Microsoft.AspNetCore.Mvc.Route("RemoveBondAsync")]
+        [HttpPost]
+        public async Task<MiddlewareDomain<UserDomain>> RemoveBondAsync([FromBody] MiddlewareDomain<UserDomain> middleware)
+        {
+            return await this.Http.PostJsonAsync<MiddlewareDomain<UserDomain>>("https://localhost:8080/user/remove_bond_async", middleware);
+        }
+
+        [Microsoft.AspNetCore.Mvc.Route("UpdateOrInsertAsync")]
+        [HttpPost]
+        public async Task<MiddlewareDomain<UserDomain>> UpdateOrInsertAsync([FromBody] MiddlewareDomain<UserDomain> middleware)
+        {
+            return await this.Http.PostJsonAsync<MiddlewareDomain<UserDomain>>("https://localhost:8080/user/update_or_insert_async", middleware);
         }
 
         [Microsoft.AspNetCore.Mvc.Route("LoginWithTokenAsync")]
         [HttpPost]
         public async Task<MiddlewareDomain<UserDomain>> LoginWithTokenAsync([FromBody] MiddlewareDomain<UserDomain> middleware)
         {
-            if (middleware == null || string.IsNullOrEmpty(middleware.Objs.First().TokenAccess) || string.IsNullOrWhiteSpace(middleware.Objs.First().TokenAccess)) return null;
-
-            middleware = await this.Http.PostJsonAsync<MiddlewareDomain<UserDomain>>("https://localhost:8080/user/login_with_token_async", middleware);
-
-            return middleware;
+            return await this.Http.PostJsonAsync<MiddlewareDomain<UserDomain>>("https://localhost:8080/user/login_with_token_async", middleware);
         }
     }
 }

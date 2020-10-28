@@ -23,14 +23,15 @@ namespace SignalManager.Client
             builder.RootComponents.Add<App>("app");
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+            builder.Services.AddSingleton<PageController>(PageController.i);
             builder.Services.AddSingleton<BagControler>();
+            builder.Services.AddSingleton<IqOptionAccount>();
             builder.Services.AddSingleton<UserDomain>();
             builder.Services.AddSingleton<FolderDomain>();
-            builder.Services.AddSingleton<IqOptionAccount>();
             builder.Services.AddSingleton<IqOptionAdminSignalDomain>();
             builder.Services.AddSingleton<Signal>();
-            builder.Services.AddSingleton<DataController<UserDomain>>();
             builder.Services.AddSingleton<DataController<IqOptionAccount>>();
+            builder.Services.AddSingleton<DataController<UserDomain>>();
             builder.Services.AddSingleton<DataController<IqOptionAdminSignalDomain>>();
             builder.Services.AddSingleton<DataController<FolderDomain>>();
             builder.Services.AddSingleton<DataController<Signal>>();

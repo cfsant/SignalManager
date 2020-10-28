@@ -22,6 +22,12 @@
         set;
     }
 
+    private bool booFrmUserLink
+    {
+        get;
+        set;
+    }
+
     protected override Task OnInitializedAsync()
     {
         return Task.Run(async () => {
@@ -66,25 +72,14 @@
             this.FirstInitialization = false;
         }
 
+        if (this.Controller.Content == null)
+        {
+            this.Controller.Content = @<Folders User="User" OnOpenFolder="OnOpenFolder"/>;
+        }
+
         if (this.User != null && this.User.Uuid != null && this.User.Uuid != default)
         {
-            // Cliente
-            // this.Content.Add(@<Client Parent="this" User="User"/>);
-
-            if (this.OpenFolder)
-            {
-                this.Content.Add(@<Folder Parent="this" User="User" Model="Folder"/>);
-
-                return;
-            }
-
-            // Admin
-            @*this.Content.Add(@<Admin Parent = "this" User = "User" />);*@
-
-            // Folder
-            this.Content.Add(@<Folders Parent="this" User="User" OnOpenFolder="OnOpenFolder" />);
-
-            //this.Content.Add(@<IqOptionAccount Parent="this" User="User" />);
+            this.Content.Add(this.Controller.Content);
         }
     }
 
@@ -92,6 +87,13 @@
     {
         this.Body = this.RenderBody();
         StateHasChanged();
+    }
+
+    public void OnUserLinkCallback()
+    {
+        this.Controller.Content = @<Folder Parent="this" User="User" Model="Folder"/>;
+
+        this.ReRenderBody();
     }
 
     private void UserInitialization()
@@ -128,7 +130,6 @@
         Console.WriteLine("Inicialização do usuário (base)...");
 
         this.booUserOnInitializeAsync = false;
-        UserDomain User = null;
 
         try
         {
@@ -156,15 +157,15 @@
                 return;
             }
 
-            User = lstUser.First();
-            if (User == null)
+            this.User = lstUser.First();
+            if (this.User == null)
             {
                 Console.WriteLine("Falha na recuperação.");
                 return;
             }
 
             Console.WriteLine("Usuário recuperado com sucesso.");
-            this.DataBag.Set(new Bag("sigmgmt_user", User));
+            this.DataBag.Set(new Bag("sigmgmt_user", this.User));
         }
         finally
         {
@@ -175,7 +176,23 @@
     private void OnOpenFolder(FolderDomain model)
     {
         this.Folder = model;
-        this.OpenFolder = true;
+        this.Controller.Content = @<Folder Parent="this" User="User" Model="Folder"/>;
+
+        this.ReRenderBody();
+    }
+
+    private void OnOpenAdmin(FolderDomain model)
+    {
+        this.Folder = model;
+        this.Controller.Content = @<Admin Parent = "this" User ="User" OnUserLinkCallback="OnUserLinkCallback" />;
+
+        this.ReRenderBody();
+    }
+
+    private void OnOpenClient(FolderDomain model)
+    {
+        this.Folder = model;
+        this.Controller.Content = @<Client Parent="this" User="User"/>;
 
         this.ReRenderBody();
     }
