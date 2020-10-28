@@ -1,0 +1,32 @@
+﻿@inherits Base
+@this.Body
+
+@code {
+    [Parameter]
+    public Signal Model
+    {
+        get;
+        set;
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        this.Class = "col-xl-5 col-lg54 col-md-10 col-sm-10 pt-xl-1 pt-lg-1 text-xl-center text-lg-center";
+
+        return Task.Run(() =>
+        {
+            this.Body = this.RenderBody();
+        });
+    }
+
+    protected override void LoadContent()
+    {
+        this.Content.Add(@<MatChip Label="@(Enum.GetName(typeof(IqOptionAdminSignalDomain.EnmActivePair), this.Model.ActivePair))" Class="bg-info text-white"/>);
+        this.Content.Add(@<MatChip Label="@(Enum.GetName(typeof(IqOptionAdminSignalDomain.EnmOrderDirection), this.Model.OrderDirection))" Class=@(((IqOptionAdminSignalDomain.EnmOrderDirection)this.Model.OrderDirection) == IqOptionAdminSignalDomain.EnmOrderDirection.Put ? "bg-success text-white" : "bg-danger text-white") />);
+        
+        if (this.Model.MartinGaleCount > 0)
+        {
+            this.Content.Add(@<MatChip Label="@string.Format("{0}x — R${1}", this.Model.MartinGaleCount, this.Model.MartinGale.ToString("N2"))" Class="bg-primary text-white"/>);
+        }
+    }
+}
