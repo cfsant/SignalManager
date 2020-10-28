@@ -272,8 +272,8 @@
             TagsHOptionContainer.Class = "col-xl-5 col-lg54 col-md-10 col-sm-10 pt-xl-1 pt-lg-1 text-xl-center text-lg-center";
             TagsHOptionContainer.Content = new Collection<RenderFragment>();
 
-            TagsHOptionContainer.Content.Add(@<MatChip Label="@(Enum.GetName(typeof(IqOptionAdminSignalDomain.EnmActivePair), model.ActivePair))" Class="bg-info text-white"/>);
-            TagsHOptionContainer.Content.Add(@<MatChip Label="@(Enum.GetName(typeof(IqOptionAdminSignalDomain.EnmOrderDirection), model.OrderDirection))" Class=@(((IqOptionAdminSignalDomain.EnmOrderDirection)model.OrderDirection) == IqOptionAdminSignalDomain.EnmOrderDirection.Put ? "bg-success text-white" : "bg-danger text-white") />);
+            TagsHOptionContainer.Content.Add(@<MatChip Label="@(Enum.GetName(typeof(ActivePair), model.ActivePair))" Class="bg-info text-white"/>);
+            TagsHOptionContainer.Content.Add(@<MatChip Label="@(Enum.GetName(typeof(OrderDirection), model.OrderDirection))" Class=@(((OrderDirection)model.OrderDirection) == OrderDirection.Put ? "bg-success text-white" : "bg-danger text-white") />);
 
             if (model.MartinGaleCount > 0)
             {

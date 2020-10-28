@@ -188,7 +188,7 @@
     {
         Collection<RenderFragment> options = new Collection<RenderFragment>();
 
-        foreach (IqOptionAdminSignalDomain.EnmExp exp in Enum.GetValues(typeof(IqOptionAdminSignalDomain.EnmExp)))
+        foreach (Exp exp in Enum.GetValues(typeof(Exp)))
         {
             options.Add(@<MatOption TValue="int" Value=@((int)exp) Class="w-100">@(((int)exp).ToString())</MatOption>);
         }
@@ -326,7 +326,7 @@
     {
         Collection<RenderFragment> options = new Collection<RenderFragment>();
 
-        foreach (IqOptionAdminSignalDomain.EnmActivePair activePair in Enum.GetValues(typeof(IqOptionAdminSignalDomain.EnmActivePair)))
+        foreach (ActivePair activePair in Enum.GetValues(typeof(ActivePair)))
         {
             options.Add(@<MatOption Value=@((int)activePair) Class="w-100">@Enum.GetName(activePair.GetType(), activePair)</MatOption>);
         }
@@ -377,7 +377,7 @@
     {
         Collection<RenderFragment> options = new Collection<RenderFragment>();
 
-        foreach (IqOptionAdminSignalDomain.EnmOrderDirection orderDirection in Enum.GetValues(typeof(IqOptionAdminSignalDomain.EnmOrderDirection)))
+        foreach (OrderDirection orderDirection in Enum.GetValues(typeof(OrderDirection)))
         {
             options.Add(@<MatOption Value=@((int)orderDirection)>@Enum.GetName(orderDirection.GetType(), orderDirection)</MatOption>);
         }

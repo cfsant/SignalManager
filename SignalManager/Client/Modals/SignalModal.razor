@@ -193,7 +193,7 @@
     {
         Collection<RenderFragment> options = new Collection<RenderFragment>();
 
-        foreach (Signal.EnmActivePair activePair in Enum.GetValues(typeof(Signal.EnmActivePair)))
+        foreach (ActivePair activePair in Enum.GetValues(typeof(ActivePair)))
         {
             options.Add(@<MatOption Value=@((int)activePair)>@Enum.GetName(activePair.GetType(), activePair)</MatOption>);
         }
@@ -236,7 +236,7 @@
     {
         Collection<RenderFragment> options = new Collection<RenderFragment>();
 
-        foreach (Signal.EnmOrderDirection direction in Enum.GetValues(typeof(Signal.EnmOrderDirection)))
+        foreach (OrderDirection direction in Enum.GetValues(typeof(OrderDirection)))
         {
             options.Add(@<MatOption Value=@((int)direction)>@Enum.GetName(direction.GetType(), direction)</MatOption>);
         }
