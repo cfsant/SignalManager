@@ -1,5 +1,4 @@
 ﻿@inherits Grid<IqOptionAdminSignalDomain>
-@inject UserDomain User 
 
 @this.Body
 @this.LoadingSpinner
@@ -25,14 +24,23 @@
         set;
     }
 
-    protected override async Task OnInitializedAsync()
+    [Parameter]
+    public UserDomain User
+    {
+        get;
+        set;
+    }
+
+    protected override Task OnInitializedAsync()
     {
         this.Class = "d-flex flex-row w-100 align-self-center mt-xl-2 mt-lg-2 p-2";
 
-        await this.DataBag.ExecuteAsync(this.SignalOnInitializeAsync());
-        this.SignalInitialization();
+        return Task.Run(async () => {
+            await this.DataBag.ExecuteAsync(this.SignalOnInitializeAsync());
+            this.SignalInitialization();
 
-        this.Body = this.RenderBody();
+            this.Body = this.RenderBody();
+        });
     }
 
     private void SignalOnInitializeAsyncEvent(bool value)
@@ -412,7 +420,7 @@
             System.Threading.Thread.Sleep(10);
         }
 
-        Console.Write("Inicialização dos sinais do administrador (page)...");
+        Console.WriteLine("Inicialização dos sinais do administrador (page)...");
 
         List<IqOptionAdminSignalDomain> lstSignal = this.DataBag.Get("sigmgmt_signals_adm") as List<IqOptionAdminSignalDomain>;
         if (lstSignal == null || lstSignal.Count < 1)
@@ -422,7 +430,7 @@
             return;
         }
 
-        Console.WriteLine("OK");
+        Console.WriteLine("Sinais do adiminstrador carregados com sucesso.");
 
         this.Data.AddRange(lstSignal);
     }
@@ -432,18 +440,17 @@
         Console.WriteLine("Inicialização dos sinais do administrador (base)...");
 
         this.booSignalsOnInitializeAsync = false;
-        UserDomain User = null;
 
         try
         {
-            if (User == null || string.IsNullOrEmpty(User.Uuid.ToString()) || string.IsNullOrWhiteSpace(User.Uuid.ToString()))
+            if (this.User == null || string.IsNullOrEmpty(this.User.Uuid.ToString()) || string.IsNullOrWhiteSpace(this.User.Uuid.ToString()))
             {
                 Console.WriteLine("Skipped.");
 
                 return;
             }
 
-            var lstSignal = await this.PostWithTokenAsync<IqOptionAdminSignalDomain>("Signal/FetchAllAsync", new IqOptionAdminSignalDomain() { UuidUser = User.Uuid }, true);
+            var lstSignal = await this.PostWithTokenAsync<IqOptionAdminSignalDomain>("Signal/FetchAllAsync", new IqOptionAdminSignalDomain() { UuidUser = this.User.Uuid }, true);
             if (lstSignal == null && lstSignal.Count < 1)
             {
 
@@ -460,26 +467,4 @@
             this.booSignalsOnInitializeAsync = true;
         }
     }
-
-    //private void Create()
-    //{
-    //    if (Data != null && Data.Count > 0)
-    //    {
-    //        return;
-    //    }
-
-    //    int intAmount = 1;
-    //    int intMinutes = 10;
-
-    //    Console.WriteLine("Create...");
-
-    //    this.Data.Add(new Signal() { Uid = Guid.NewGuid().ToString(), Date = DateTime.Now.AddMinutes(++intMinutes), Amount = ++intAmount, Pair = Signal.Pairs.AUDCAD, Direction = Signal.Directions.PUT });
-    //    this.Data.Add(new Signal() { Uid = Guid.NewGuid().ToString(), Date = DateTime.Now.AddMinutes(++intMinutes), Amount = ++intAmount, Pair = Signal.Pairs.AUDCHF, Direction = Signal.Directions.CALL });
-    //    this.Data.Add(new Signal() { Uid = Guid.NewGuid().ToString(), Date = DateTime.Now.AddMinutes(++intMinutes), Amount = ++intAmount, Pair = Signal.Pairs.AUDJPY, Direction = Signal.Directions.PUT });
-    //    this.Data.Add(new Signal() { Uid = Guid.NewGuid().ToString(), Date = DateTime.Now.AddMinutes(++intMinutes), Amount = ++intAmount, Pair = Signal.Pairs.AUDNOK, Direction = Signal.Directions.CALL });
-    //    this.Data.Add(new Signal() { Uid = Guid.NewGuid().ToString(), Date = DateTime.Now.AddMinutes(++intMinutes), Amount = ++intAmount, Pair = Signal.Pairs.AUDNZD, Direction = Signal.Directions.PUT });
-    //    this.Data.Add(new Signal() { Uid = Guid.NewGuid().ToString(), Date = DateTime.Now.AddMinutes(++intMinutes), Amount = ++intAmount, Pair = Signal.Pairs.AUDSEK, Direction = Signal.Directions.CALL });
-    //    this.Data.Add(new Signal() { Uid = Guid.NewGuid().ToString(), Date = DateTime.Now.AddMinutes(++intMinutes), Amount = ++intAmount, Pair = Signal.Pairs.AUDSGD, Direction = Signal.Directions.PUT });
-    //    this.Data.Add(new Signal() { Uid = Guid.NewGuid().ToString(), Date = DateTime.Now.AddMinutes(++intMinutes), Amount = ++intAmount, Pair = Signal.Pairs.AUDUSD, Direction = Signal.Directions.CALL });
-    //}
 }

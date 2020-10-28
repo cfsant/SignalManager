@@ -45,12 +45,7 @@
         }
 
         this.Content = new Collection<RenderFragment>();
-        this.Content.Add(@<FrmSignal Parent=this OnFormSubmitCallBack=@(new Action(ReRenderBody)) User="User"/>);
-        this.Content.Add(@<GrdSignal Parent=this OnEditCallback=@(new Action(ReRenderBody)) OnRemoveCallback=@(new Action(ReRenderBody))/>);
-    }
-
-    private void OnFormSubmitCallBack()
-    {
-
+        this.Content.Add(@<FrmSignal Parent=this User="User" OnFormSubmitCallBack=@(new Action(ReRenderBody)) />);
+        this.Content.Add(@<GrdSignal Parent=this User="User" OnEditCallback=@(new Action(ReRenderBody)) OnRemoveCallback=@(new Action(ReRenderBody)) />);
     }
 }

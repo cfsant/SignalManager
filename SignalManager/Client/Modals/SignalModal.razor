@@ -128,8 +128,8 @@
         }
 
         Collection<RenderFragment> DateInputContainerContent = new Collection<RenderFragment>();
-        DateInputContainerContent.Add(@<Label Parent="@DateInputContainer" For="dateInput" Text="Data:"/>);
-        DateInputContainerContent.Add(@<MatDatePicker Outlined="true" TValue="DateTime" Enable24hours="true" EnableSeconds="true" Format="dd/MM/yyyy HH:mm:ss" EnableTime="true" @bind-Value="@this.dttOperacao" Class="w-100" Id="dateInput"/>);
+        DateInputContainerContent.Add(@<Label Parent="@DateInputContainer" For="@string.Concat("dateInput_", this.Uid)" Text="Data:"/>);
+        DateInputContainerContent.Add(@<MatDatePicker Outlined="true" TValue="DateTime" Enable24hours="true" EnableSeconds="true" Format="dd/MM/yyyy HH:mm:ss" EnableTime="true" @bind-Value="@this.dttOperacao" Class="w-100" Id="@string.Concat("dateInput_", this.Uid)"/>);
         DateInputContainerContent.Add(@<Small Parent="@DateInputContainer" Text="Informe a data da operação aqui." Class="form-text text-muted" />);
 
         DateInputContainer.Content = DateInputContainerContent;
@@ -149,8 +149,8 @@
         }
 
         Collection<RenderFragment> AmountInputContainerContent = new Collection<RenderFragment>();
-        AmountInputContainerContent.Add(@<Label Parent="@AmountInputContainer" For="amountInput" Text="Valor:"/>);
-        AmountInputContainerContent.Add(@<MatNumericUpDownField @bind-Value="@this.intAmout" Outlined="true" FieldType="MatNumericUpDownFieldType.Currency" DecimalPlaces=2 Class="w-100" Id="amountInput" />);
+        AmountInputContainerContent.Add(@<Label Parent="@AmountInputContainer" For="@string.Concat("amountInput_", this.Uid)" Text="Valor:"/>);
+        AmountInputContainerContent.Add(@<MatNumericUpDownField @bind-Value="@this.intAmout" Outlined="true" FieldType="MatNumericUpDownFieldType.Currency" DecimalPlaces=2 Class="w-100" Id="@string.Concat("amountInput_", this.Uid)" />);
         AmountInputContainerContent.Add(@<Small Parent="@AmountInputContainer" Text="Informe o valor da operação aqui." Class="form-text text-muted" />);
 
         AmountInputContainer.Content = AmountInputContainerContent;
@@ -170,7 +170,7 @@
         }
 
         Collection<RenderFragment> GoalInputContainerContent = new Collection<RenderFragment>();
-        GoalInputContainerContent.Add(@<Label Parent="@GoalInputContainer" For="pairInput" Text="Par:"/>);
+        GoalInputContainerContent.Add(@<Label Parent="@GoalInputContainer" For="@string.Concat("pairInput_", this.Uid)" Text="Par:"/>);
         GoalInputContainerContent.Add(this.GetPairInputField());
         GoalInputContainerContent.Add(@<Small Parent="@GoalInputContainer" Text="Informe o par da operação aqui." Class="form-text text-muted" />);
 
@@ -181,7 +181,7 @@
 
     private RenderFragment GetPairInputField()
     {
-        return @<MatSelect Outlined="true" @bind-Value="@this.intPair" Class="w-100" Id="pairInput">
+        return @<MatSelect Outlined="true" @bind-Value="@this.intPair" Class="w-100" Id="@string.Concat("pairInput_", this.Uid)">
                     @foreach (RenderFragment option in this.GetPairInputFieldOptions())
                     {
                         @option
