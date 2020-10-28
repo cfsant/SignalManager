@@ -1,0 +1,49 @@
+﻿@this.Body
+
+@code {
+    [Parameter]
+    public Base Parent
+    {
+        get;
+        set;
+    }
+
+    [Parameter]
+    public Signal Model
+    {
+        get;
+        set;
+    }
+
+    private RenderFragment Body
+    {
+        get;
+        set;
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        return Task.Run(() => {
+            this.Body = this.RenderBody();
+        });
+    }
+
+    private RenderFragment RenderBody()
+    {
+        Base SelectedHOptionContainer = new Base();
+        SelectedHOptionContainer.Parent = this.Parent;
+        SelectedHOptionContainer.Class = "d-xl-block d-lg-block d-md-none d-sm-none col-xl-1 col-lg-1 col-md-12 col-sm-12 pr-0 pt-1";
+        SelectedHOptionContainer.Content = new Collection<RenderFragment>();
+
+        Base SelectedHOptionSubContainer = new Base();
+        SelectedHOptionSubContainer.Parent = SelectedHOptionContainer;
+        SelectedHOptionSubContainer.Class = "d-flex justify-content-center pl-4";
+        SelectedHOptionSubContainer.Content = new Collection<RenderFragment>() {
+            new Input<bool>() { Parent = SelectedHOptionSubContainer, Class="form-check-input", Type="checkbox", Value=this.Model.Selected }.RenderBody()
+        };
+
+        SelectedHOptionContainer.Content.Add(SelectedHOptionSubContainer.RenderBody());
+
+        return SelectedHOptionContainer.RenderBody();
+    }
+}

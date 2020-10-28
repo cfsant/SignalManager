@@ -360,10 +360,25 @@
         return Rows;
     }
 
+    private RenderFragment GetRow(Base Parent, Signal model)
+    {
+        Row<Signal> row = new Row<Signal>();
+        row.Parent = Parent;
+        row.Class = "d-inline-flex flex-row flex-wrap border-sm border-md border-lg tt-col-sm tt-col-md mt-2 w-100 min-sm-h-180";
+        row.Style = "border-radius:15px;";
+        row.Content = new Collection<RenderFragment>();
+
+        return row.RenderBody();
+    }
+
+
     private RenderFragment GetModal(Base Parent, Signal model)
     {
         return @<MatDialog @bind-IsOpen="@model.Editing">
-                    <SignalModal Parent="Parent" Model="model" OnModelUpdateCallback=@(new Action<Signal>((m) => OnModelUpdate(m))) OnCancelationCallback=@(new Action<Signal>((m) => OnModalCancelation(m)))/>
+                    @if (model.Editing)
+                    {
+                        <SignalModal Parent="Parent" Model="model" OnModelUpdateCallback=@(new Action<Signal>((m) => OnModelUpdate(m))) OnCancelationCallback=@(new Action<Signal>((m) => OnModalCancelation(m)))/>
+                    }
                 </MatDialog>;
     }
 

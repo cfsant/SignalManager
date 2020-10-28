@@ -1,0 +1,44 @@
+﻿@typeparam TModel
+@inherits Base
+
+@this.Body
+
+@code {
+    [Parameter]
+    public TModel Model
+    {
+        get;
+        set;
+    }
+
+    [Parameter]
+    public Action<TModel> OnEdit
+    {
+        get;
+        set;
+    }
+
+    [Parameter]
+    public Action<TModel> OnRemove
+    {
+        get;
+        set;
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        return Task.Run(() => {
+            this.Body = this.RenderBody();
+        });
+    }
+
+    protected RenderFragment GetEditControl()
+    {
+        return @<MatIconButton Icon="@MatIconNames.Edit" OnClick=@(new Action(() => OnEdit(this.Model))) />;
+    }
+
+    protected RenderFragment GetRemoveControl()
+    {
+        return @<MatIconButton Icon="@MatIconNames.Delete" OnClick=@(new Action(() => OnRemove(this.Model)))/>;
+    }
+}

@@ -1,0 +1,21 @@
+﻿@inherits Row<Signal>
+
+@code {
+    protected override Task OnInitializedAsync()
+    {
+        return Task.Run(() => {
+            this.Body = this.RenderBody();
+        });
+    }
+
+    protected override void LoadContent()
+    {
+        this.Content.Add(@<GrdSignalRowSelectedOption Parent="this" Model="this.Model"/>);
+        this.Content.Add(@<GrdSignalRowEntry Parent="this" Model="this.Model"/>);
+        this.Content.Add(@<GrdSignalRowExp Parent="this" Model="this.Model"/>);
+        this.Content.Add(@<GrdSignalRowAmount Parent="this" Model="this.Model"/>);
+
+        this.Content.Add(this.GetEditControl());
+        this.Content.Add(this.GetRemoveControl());
+    }
+}

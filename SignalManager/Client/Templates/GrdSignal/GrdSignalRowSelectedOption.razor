@@ -1,0 +1,33 @@
+﻿@inherits Base
+@this.Body
+
+@code {
+    [Parameter]
+    public Signal Model
+    {
+        get;
+        set;
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        this.Class = "d-xl-block d-lg-block d-md-none d-sm-none col-xl-1 col-lg-1 col-md-12 col-sm-12 pr-0 pt-1";
+
+        return Task.Run(() =>
+        {
+            this.Body = this.RenderBody();
+        });
+    }
+
+    protected override void LoadContent()
+    {
+        Base content = new Base();
+        content.Parent = this;
+        content.Class = "d-flex justify-content-center pl-4";
+        content.Content = new Collection<RenderFragment>() {
+            new Input<bool>() { Parent = content, Class="form-check-input", Type="checkbox", Value=this.Model.Selected }.RenderBody()
+        };
+
+        this.Content.Add(content.RenderBody());
+    }
+}

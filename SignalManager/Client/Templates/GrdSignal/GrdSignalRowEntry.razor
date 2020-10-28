@@ -1,0 +1,26 @@
+﻿@inherits Base
+@this.Body
+
+@code {
+    [Parameter]
+    public Signal Model
+    {
+        get;
+        set;
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        this.Class = "col-xl-2 col-lg-2 col-md-6 col-sm-6 pt-xl-1 pt-lg-1";
+
+        return Task.Run(() =>
+        {
+            this.Body = this.RenderBody();
+        });
+    }
+
+    protected override void LoadContent()
+    {
+        this.Content.Add(new Text() { Parent = this, Content = this.Model.Entry.ToString("dd/MM/yyyy HH:mm:ss") }.RenderBody());
+    }
+}
