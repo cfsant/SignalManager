@@ -11,11 +11,14 @@
     protected override void LoadContent()
     {
         this.Content.Add(@<GrdSignalRowSelectedOption Parent="this" Model="this.Model"/>);
+        this.Content.Add(@<GrdSignalCardView Parent="this" Model="this.Model"/>);
         this.Content.Add(@<GrdSignalRowEntry Parent="this" Model="this.Model"/>);
         this.Content.Add(@<GrdSignalRowExp Parent="this" Model="this.Model"/>);
         this.Content.Add(@<GrdSignalRowAmount Parent="this" Model="this.Model"/>);
-
-        this.Content.Add(this.GetEditControl());
-        this.Content.Add(this.GetRemoveControl());
+        this.Content.Add(@<Label Class="d-block d-xl-none d-lg-none d-md-block d-sm-block col-md-2 col-sm-2 align-self-top pt-1" Text="Informações da operação:" Bold="true" Style="max-height:18px"/>);
+        this.Content.Add(@<GrdSignalCardViewOperationsInfo Parent="this" Model="this.Model"/>);
+        this.Content.Add(@<GrdSignalCardViewOptions Parent="this" Model="this.Model" OnEdit="OnEdit" OnRemove="OnRemove" />);
+        this.Content.Add(@<GrdSignalRowOptions Parent="this" Model="this.Model" OnEdit="OnEdit" OnRemove="OnRemove" />);
+        this.Content.Add(@<GrdSignalModal Parent="this" Model="this.Model" OnModelUpdate="OnModelUpdate" OnModalCancelation="OnModalCancelation" />);
     }
 }

@@ -1,0 +1,41 @@
+﻿@inherits Base
+@this.Body
+
+@code {
+    [Parameter]
+    public Signal Model
+    {
+        get;
+        set;
+    }
+
+    [Parameter]
+    public Action<Signal> OnEdit
+    {
+        get;
+        set;
+    }
+
+    [Parameter]
+    public Action<Signal> OnRemove
+    {
+        get;
+        set;
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        this.Class = "col-1 d-inline-flex justify-content-end";
+
+        return Task.Run(() =>
+        {
+            this.Body = this.RenderBody();
+        });
+    }
+
+    protected override void LoadContent()
+    {
+        this.Content.Add(@<GrdSignalEdit Parent="this" Model="this.Model" OnEdit="OnEdit" />);
+        this.Content.Add(@<GrdSignalRemove Parent="this" Model="this.Model" OnRemove="OnRemove" />);
+    }
+}

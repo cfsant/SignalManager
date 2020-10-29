@@ -25,20 +25,24 @@
         set;
     }
 
+    [Parameter]
+    public Action<TModel> OnModelUpdate
+    {
+        get;
+        set;
+    }
+
+    [Parameter]
+    public Action<TModel> OnModalCancelation
+    {
+        get;
+        set;
+    }
+
     protected override Task OnInitializedAsync()
     {
         return Task.Run(() => {
             this.Body = this.RenderBody();
         });
-    }
-
-    protected RenderFragment GetEditControl()
-    {
-        return @<MatIconButton Icon="@MatIconNames.Edit" OnClick=@(new Action(() => OnEdit(this.Model))) />;
-    }
-
-    protected RenderFragment GetRemoveControl()
-    {
-        return @<MatIconButton Icon="@MatIconNames.Delete" OnClick=@(new Action(() => OnRemove(this.Model)))/>;
     }
 }

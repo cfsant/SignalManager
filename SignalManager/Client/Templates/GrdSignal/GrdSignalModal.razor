@@ -1,0 +1,52 @@
+﻿@inherits Base
+@this.Body
+
+@code {
+    [Parameter]
+    public Signal Model
+    {
+        get;
+        set;
+    }
+
+    [Parameter]
+    public Action<Signal> OnModelUpdate
+    {
+        get;
+        set;
+    }
+
+    [Parameter]
+    public Action<Signal> OnModalCancelation
+    {
+        get;
+        set;
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        this.Class = "col-xl-5 col-lg54 col-md-10 col-sm-10 pt-xl-1 pt-lg-1 text-xl-center text-lg-center";
+
+        return Task.Run(() =>
+        {
+            this.Body = this.RenderBody();
+        });
+    }
+
+    protected override void LoadContent()
+    {
+
+    }
+
+    public override RenderFragment RenderBody()
+    {
+        if (!this.Model.Editing)
+        {
+            return null;
+        }
+
+        return @<MatDialog @bind-IsOpen="@this.Model.Editing">
+                    <SignalModal Parent="this" Model="this.Model" OnModelUpdateCallback=@(new Action<Signal>((m) => OnModelUpdate(m))) OnCancelationCallback=@(new Action<Signal>((m) => OnModalCancelation(m))) />
+                </MatDialog>;
+    }
+}
