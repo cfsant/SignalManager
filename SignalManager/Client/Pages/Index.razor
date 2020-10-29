@@ -10,11 +10,17 @@
         set;
     }
 
-    private FolderDomain Folder 
+    private FolderDomain Folder
     {
         get;
         set;
     }
+
+    public RenderFragment TabFragment
+    {
+        get;
+        set;
+    } = default;
 
     protected override Task OnInitializedAsync()
     {
@@ -33,7 +39,14 @@
 
         this.Content = new Collection<RenderFragment>();
         this.Content.Add(@<TopNav Parent=this Title="Signal Manager" User="User" OnLogoutCallback="OnLogoutCallback" OnLoginCallback="OnLoginCallback"/>);
-
+        this.TabFragment =  @<MatTabGroup>
+                                <MatTab Label="Pastas">
+                                    <Folders User="User" OnOpenFolder="OnOpenFolder" />;
+                                </MatTab>
+                                <MatTab Label="Configuração">
+                                    <IqOptionAccount Parent="this" User="User" />;
+                                </MatTab>
+                            </MatTabGroup>;
         this.LoadContentBody();
     }
 
@@ -62,7 +75,7 @@
 
         if (this.Controller.Content == null)
         {
-            this.Controller.Content = @<Folders User="User" OnOpenFolder="OnOpenFolder"/>;
+           this.Controller.Content = this.TabFragment;
         }
 
         if (this.User != null && this.User.Uuid != null && this.User.Uuid != default)
@@ -164,6 +177,7 @@
     private void OnOpenFolder(FolderDomain model)
     {
         this.Folder = model;
+
         this.Controller.Content = @<Folder Parent="this" User="User" Model="Folder"/>;
 
         this.ReRenderBody();
@@ -180,7 +194,7 @@
     private void OnOpenClient(FolderDomain model)
     {
         this.Folder = model;
-        this.Controller.Content = @<Client Parent="this" User="User"/>;
+        this.Controller.Content = @<IqOptionAccount Parent="this" User="User"/>;
 
         this.ReRenderBody();
     }
