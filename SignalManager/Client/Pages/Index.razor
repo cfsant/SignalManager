@@ -150,7 +150,7 @@
                 return;
             }
 
-            var lstUser = await this.PostWithTokenAsync<UserDomain>("User/LoginWithTokenAsync", new UserDomain() { TokenAccess = TokenAccess }, true);
+            var lstUser = await this.PostWithTokenAsync<UserDomain>("User/LoginWithTokenAsync", new UserDomain() { TokenAccess = TokenAccess });
             if (lstUser == null || lstUser.Count < 1)
             {
                 Console.WriteLine("Token inválido.");

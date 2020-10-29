@@ -60,7 +60,7 @@
 
     protected async override Task<bool> OnModelPush()
     {
-        var lstUser = await this.PostWithTokenAsync<UserDomain>("User/LoginAsync", this.Model, true);
+        var lstUser = await this.PostWithTokenAsync<UserDomain>("User/LoginAsync", this.Model);
         if (lstUser == null || lstUser.Count < 1)
         {
             return false;
@@ -78,7 +78,7 @@
         Console.WriteLine("OK");
 
         Console.Write("Create folders bag...");
-        var lstFolder = await this.PostWithTokenAsync<FolderDomain>("Folder/FetchAllAsync", new FolderDomain() { UuidUser = this.User.Uuid }, true);
+        var lstFolder = await this.PostWithTokenAsync<FolderDomain>("Folder/FetchAllAsync", new FolderDomain() { UuidUser = this.User.Uuid });
         if (lstFolder != null && lstFolder.Count > 0)
         {
 
@@ -176,12 +176,12 @@
         
         Collection<RenderFragment> UserInputContainerContent = new Collection<RenderFragment>();
         UserInputContainerContent.Add(@<MatTextField Outlined="true" TValue="string" @bind-Value="@this.Model.Password" Class="w-100" Id="passInput" Type="password" PlaceHolder="Password" />);
-        
+
         UserInputContainer.Content = UserInputContainerContent;
-        
+
         return UserInputContainer.RenderBody();
     }
-    
+
     private RenderFragment GetCommitButtonContainer(Base Parent)
     {
         Base DateInputContainer = new Base();
@@ -189,10 +189,10 @@
         DateInputContainer.Class = "form-group d-flex p-2 w-100 align-items-center";
         DateInputContainer.Content = new Collection<RenderFragment>();
         DateInputContainer.Content.Add(this.GetButton());
-        
+
         return DateInputContainer.RenderBody();
     }
-    
+
     private RenderFragment GetButton()
     {
         return @<button id="@Guid.NewGuid().ToString()" class="btn btn-dark w-100" type="button" @onclick="OnModelUpdate">Login</button>;
