@@ -36,10 +36,17 @@
         this.Class = "d-flex flex-row w-100 align-self-center mt-xl-2 mt-lg-2 p-2";
 
         return Task.Run(async () => {
-            await this.DataBag.ExecuteAsync(this.SignalOnInitializeAsync());
-            this.SignalInitialization();
+            try
+            {
+                await this.DataBag.ExecuteAsync(this.SignalOnInitializeAsync());
+                this.SignalInitialization();
 
-            this.Body = this.RenderBody();
+                this.Body = this.RenderBody();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         });
     }
 
@@ -212,195 +219,10 @@
             Signal model = new Signal();
             model = Utils.Parse<IqOptionAdminSignalDomain, Signal>(item, model);
 
-            Base BodyContainer = new Base();
-            BodyContainer.Parent = Parent;
-            BodyContainer.Class = "d-inline-flex flex-row flex-wrap border-sm border-md border-lg tt-col-sm tt-col-md mt-2 w-100 min-sm-h-180";
-            BodyContainer.Style = "border-radius:15px;";
-            BodyContainer.Content = new Collection<RenderFragment>();
-
-            Base SelectedHOptionContainer = new Base();
-            SelectedHOptionContainer.Parent = BodyContainer;
-            SelectedHOptionContainer.Class = "d-xl-block d-lg-block d-md-none d-sm-none col-xl-1 col-lg-1 col-md-12 col-sm-12 pr-0 pt-1";
-            SelectedHOptionContainer.Content = new Collection<RenderFragment>();
-
-            Base SelectedHOptionSubContainer = new Base();
-            SelectedHOptionSubContainer.Parent = SelectedHOptionContainer;
-            SelectedHOptionSubContainer.Class = "d-flex justify-content-center pl-4";
-            SelectedHOptionSubContainer.Content = new Collection<RenderFragment>() {
-                new Input<bool>() { Parent = SelectedHOptionSubContainer, Class="form-check-input", Type="checkbox", Value=model.Selected }.RenderBody()
-            };
-
-            SelectedHOptionContainer.Content.Add(SelectedHOptionSubContainer.RenderBody());
-
-            Base DateHOptionContainer = new Base();
-            DateHOptionContainer.Parent = BodyContainer;
-            DateHOptionContainer.Class = "col-xl-2 col-lg-2 col-md-6 col-sm-6 pt-xl-1 pt-lg-1";
-            DateHOptionContainer.Content = new Collection<RenderFragment>() {
-                new Text() { Parent = DateHOptionContainer, Content = model.Entry.ToString("dd/MM/yyyy HH:mm:ss") }.RenderBody()
-            };
-
-            RenderFragment DataHOptionLabel = @<Label For="@DateHOptionContainer.Uid" Class="d-block d-xl-none d-lg-none d-md-block d-sm-block col-md-6 col-sm-6 align-self-center" Text="Data:" Bold="true" Style="max-height:18px"/>;
-
-            Base DurationHOptionContainer = new Base();
-            DurationHOptionContainer.Parent = BodyContainer;
-            DurationHOptionContainer.Class = "col-xl-1 col-lg-1 col-md-3 col-sm-3 pt-xl-1 pt-lg-1 pl-xl-4 pl-lg-2";
-            DurationHOptionContainer.Content = new Collection<RenderFragment>() {
-                new Text() { Parent = DurationHOptionContainer, Content = model.Exp.ToString(), Class="text-right text-xl-left text-lg-center" }.RenderBody()
-            };
-
-            RenderFragment DurationHOptionLabel = @<Label For="@DurationHOptionContainer.Uid" Class="d-block d-xl-none d-lg-none d-md-block d-sm-block col-md-3 col-sm-3 align-self-center" Text="Duração:" Bold="true" Style="max-height:18px"/>;
-
-            Base AmountHOptionContainer = new Base();
-            AmountHOptionContainer.Parent = BodyContainer;
-            AmountHOptionContainer.Class = "col-xl-2 col-lg-2 col-md-3 col-sm-3 pt-xl-1 pt-lg-1 text-xl-center";
-            AmountHOptionContainer.Content = new Collection<RenderFragment>() {
-                new Text() { Parent = AmountHOptionContainer, Content=model.Amount.ToString("N2"), Class="text-right text-xl-center text-lg-center" }.RenderBody()
-            };
-
-            RenderFragment AmountHOptionLabel = @<Label For="@AmountHOptionContainer.Uid" Class="d-block d-xl-none d-lg-none d-md-block d-sm-block col-md-3 col-sm-3 align-self-center text-right" Text="Valor:" Bold="true" Style="max-height:18px"/>;
-
-            Base CardFirstRowHOptionContainer = new Base();
-            CardFirstRowHOptionContainer.Parent = BodyContainer;
-            CardFirstRowHOptionContainer.Class = "d-inline-flex d-xl-none d-lg-none d-md-inline-flex d-sm-inline-flex w-100";
-            CardFirstRowHOptionContainer.Content = new Collection<RenderFragment>();
-            CardFirstRowHOptionContainer.Content.Add(DataHOptionLabel);
-            CardFirstRowHOptionContainer.Content.Add(DurationHOptionLabel);
-            CardFirstRowHOptionContainer.Content.Add(AmountHOptionLabel);
-
-            Base TagsHOptionContainer = new Base();
-            TagsHOptionContainer.Parent = BodyContainer;
-            TagsHOptionContainer.Class = "col-xl-5 col-lg54 col-md-10 col-sm-10 pt-xl-1 pt-lg-1 text-xl-center text-lg-center";
-            TagsHOptionContainer.Content = new Collection<RenderFragment>();
-
-            TagsHOptionContainer.Content.Add(@<MatChip Label="@(Enum.GetName(typeof(ActivePair), model.ActivePair))" Class="bg-info text-white"/>);
-            TagsHOptionContainer.Content.Add(@<MatChip Label="@(Enum.GetName(typeof(OrderDirection), model.OrderDirection))" Class=@(((OrderDirection)model.OrderDirection) == OrderDirection.Put ? "bg-success text-white" : "bg-danger text-white") />);
-
-            if (model.MartinGaleCount > 0)
-            {
-                TagsHOptionContainer.Content.Add(@<MatChip Label="@string.Format("{0}x — R${1}", model.MartinGaleCount, model.MartinGale.ToString("N2"))" Class="bg-primary text-white"/>);
-            }
-
-            RenderFragment TagsHOptionLabel = @<Label For="@TagsHOptionContainer.Uid" Class="d-block d-xl-none d-lg-none d-md-block d-sm-block col-md-2 col-sm-2 align-self-top pt-1" Text="Tags:" Bold="true" Style="max-height:18px"/>;
-
-            // CARD-VIEW
-            Base HOptionCard = new Base();
-            HOptionCard.Parent = BodyContainer;
-            HOptionCard.Class = "d-inline-flex d-xl-none d-lg-none d-md-inline-flex d-sm-inline-flex pt-1 pl-3 pr-3 w-100 bg-dark text-white";
-            HOptionCard.Style = "border-bottom-right-radius:15px; border-bottom-left-radius:15px;";
-            HOptionCard.Content = new Collection<RenderFragment>();
-
-            Base EditHOptionCardContainer = new Base();
-            EditHOptionCardContainer.Parent = HOptionCard;
-            EditHOptionCardContainer.Class = "d-flex w-50 text-center";
-            EditHOptionCardContainer.Content = new Collection<RenderFragment>() {
-                this.GetEditControl(model, false)
-            };
-
-            Base RemoveHOptionCardContainer = new Base();
-            RemoveHOptionCardContainer.Parent = HOptionCard;
-            RemoveHOptionCardContainer.Class = "d-flex w-50 text-center";
-            RemoveHOptionCardContainer.Content = new Collection<RenderFragment>() {
-                this.GetRemoveControl(model, false)
-            };
-
-            HOptionCard.Content.Add(EditHOptionCardContainer.RenderBody());
-            HOptionCard.Content.Add(RemoveHOptionCardContainer.RenderBody());
-
-            // TABLE-VIEW
-            Base EditHOptionContainer = new Base();
-            EditHOptionContainer.Parent = BodyContainer;
-            EditHOptionContainer.Class = "d-xl-block d-lg-block d-md-none d-sm-none text-center p-0 m-0";
-            EditHOptionContainer.Content = new Collection<RenderFragment>() {
-                this.GetEditControl(model, true)
-            };
-
-            Base RemoveHOptionContainer = new Base();
-            RemoveHOptionContainer.Parent = BodyContainer;
-            RemoveHOptionContainer.Class = "d-xl-block d-lg-block d-md-none d-sm-none d-xs-none text-center p-0 m-0";
-            RemoveHOptionContainer.Content = new Collection<RenderFragment>() {
-                this.GetRemoveControl(model, true)
-            };
-
-            // CARD-VIEW 
-            // HIDDEN
-            BodyContainer.Content.Add(SelectedHOptionContainer.RenderBody());
-
-            // FIRST ROW 
-            BodyContainer.Content.Add(CardFirstRowHOptionContainer.RenderBody());
-
-            BodyContainer.Content.Add(DateHOptionContainer.RenderBody());
-            BodyContainer.Content.Add(DurationHOptionContainer.RenderBody());
-            BodyContainer.Content.Add(AmountHOptionContainer.RenderBody());
-
-            // SECOND ROW
-            BodyContainer.Content.Add(TagsHOptionLabel);
-
-            BodyContainer.Content.Add(TagsHOptionContainer.RenderBody());
-
-            // THIRD ROW
-
-            // CONTROL'S
-            BodyContainer.Content.Add(HOptionCard.RenderBody());
-
-            Base ControlsContainer = new Base();
-            ControlsContainer.Parent = BodyContainer;
-            ControlsContainer.Class = "col-1 d-inline-flex justify-content-end";
-            ControlsContainer.Content = new Collection<RenderFragment>();
-            ControlsContainer.Content.Add(EditHOptionContainer.RenderBody());
-            ControlsContainer.Content.Add(RemoveHOptionContainer.RenderBody());
-
-            BodyContainer.Content.Add(ControlsContainer.RenderBody());
-
-            // MODAL
-            BodyContainer.Content.Add(this.GetModal(BodyContainer, model));
-
-            //Rows.Add(BodyContainer.RenderBody());
             Rows.Add(@<GrdSignalRow Parent="Parent" Model="model" OnEdit="OnEdit" OnRemove="OnRemove" OnModelUpdate="OnModelUpdate" OnModalCancelation="OnModalCancelation" />);
         }
 
         return Rows;
-    }
-
-    private RenderFragment GetRow(Base Parent, Signal model)
-    {
-        Row<Signal> row = new Row<Signal>();
-        row.Parent = Parent;
-        row.Class = "d-inline-flex flex-row flex-wrap border-sm border-md border-lg tt-col-sm tt-col-md mt-2 w-100 min-sm-h-180";
-        row.Style = "border-radius:15px;";
-        row.Content = new Collection<RenderFragment>();
-
-        return row.RenderBody();
-    }
-
-
-    private RenderFragment GetModal(Base Parent, Signal model)
-    {
-        return @<MatDialog @bind-IsOpen="@model.Editing">
-                    @if (model.Editing)
-                    {
-                        <SignalModal Parent="Parent" Model="model" OnModelUpdateCallback=@(new Action<Signal>((m) => OnModelUpdate(m))) OnCancelationCallback=@(new Action<Signal>((m) => OnModalCancelation(m)))/>
-                    }
-                </MatDialog>;
-    }
-
-    private RenderFragment GetEditControl(Signal model, bool Link = false)
-    {
-        if (Link)
-        {
-            return @<MatIconButton Icon="@MatIconNames.Edit" OnClick=@(new Action(() => OnEdit(model))) />;
-        }
-
-        return @<Button Class="btn btn-dark w-100" OnClick=@(new Action(() => OnEdit(model))) Text="Editar"/>;
-    }
-
-    private RenderFragment GetRemoveControl(Signal model, bool Link = false)
-    {
-        if (Link)
-        {
-            return @<MatIconButton Icon="@MatIconNames.Delete" OnClick=@(new Action(() => OnRemove(model)))/>;
-        }
-
-        return @<Button Class="btn btn-dark w-100" OnClick=@(new Action(() => OnRemove(model))) Text="Remover"/>;
     }
 
     private void OnEdit(Signal model)

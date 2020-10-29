@@ -21,6 +21,8 @@
 
     protected override void LoadContent()
     {
+        this.Content = new Collection<RenderFragment>();
+
         this.Content.Add(@<MatChip Label="@(Enum.GetName(typeof(ActivePair), this.Model.ActivePair))" Class="bg-info text-white"/>);
         this.Content.Add(@<MatChip Label="@(Enum.GetName(typeof(OrderDirection), this.Model.OrderDirection))" Class=@(((OrderDirection)this.Model.OrderDirection) == OrderDirection.Put ? "bg-success text-white" : "bg-danger text-white") />);
         

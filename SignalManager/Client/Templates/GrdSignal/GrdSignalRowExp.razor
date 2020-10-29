@@ -21,6 +21,8 @@
 
     protected override void LoadContent()
     {
+        this.Content = new Collection<RenderFragment>();
+
         this.Content.Add(new Text() { Parent = this, Content = this.Model.Exp.ToString(), Class = "text-right text-xl-left text-lg-center" }.RenderBody());
     }
 }

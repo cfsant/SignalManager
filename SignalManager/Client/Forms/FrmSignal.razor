@@ -12,24 +12,36 @@
 
     protected override Task OnInitializedAsync()
     {
-        base.OnInitializedAsync();
-
         return Task.Run(() => {
-            this.Body = this.RenderBody();
+            try
+            {
+                this.Body = this.RenderBody();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         });
     }
 
     protected override void LoadContent()
     {
-        if (string.IsNullOrEmpty(this.Class) || string.IsNullOrWhiteSpace(this.Class))
+        try
         {
-            this.Class = "d-flex flex-column w-100 align-self-center p-md-1 p-lg-1 p-xl-1";
+            if (string.IsNullOrEmpty(this.Class) || string.IsNullOrWhiteSpace(this.Class))
+            {
+                this.Class = "d-flex flex-column w-100 align-self-center p-md-1 p-lg-1 p-xl-1";
+            }
+
+            this.OnModelLoad(this.Model);
+
+            this.Content = new Collection<RenderFragment>();
+            this.Content.Add(this.GetForm());
         }
-
-        this.OnModelLoad(this.Model);
-
-        this.Content = new Collection<RenderFragment>();
-        this.Content.Add(this.GetForm());
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
     }
 
     protected override void OnModelLoad(IqOptionAdminSignalDomain model)
@@ -103,15 +115,15 @@
         Container.Parent = this;
         Container.Class = "d-flex flex-wrap justify-content-center w-100";
         Container.Content = new Collection<RenderFragment>() {
-            this.GetDateInputContainer(Container),
-            this.GetDurationInputContainer(Container),
-            this.GetPairInputContainer(Container),
-            this.GetDirectionInputContainer(Container),
-            this.GetAmountInputContainer(Container),
-            this.GetMartinGaleInputContainer(Container),
-            this.GetMartinGaleValueInputContainer(Container),
-            this.GetCommitButtonContainer(Container)
-        };
+                this.GetDateInputContainer(Container),
+                this.GetDurationInputContainer(Container),
+                this.GetPairInputContainer(Container),
+                this.GetDirectionInputContainer(Container),
+                this.GetAmountInputContainer(Container),
+                this.GetMartinGaleInputContainer(Container),
+                this.GetMartinGaleValueInputContainer(Container),
+                this.GetCommitButtonContainer(Container)
+            };
 
         return Container.RenderBody();
     }

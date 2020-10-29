@@ -28,6 +28,8 @@
 
     protected override void LoadContent()
     {
+        this.Content = new Collection<RenderFragment>();
+
         this.Content.Add(@<MatIconButton Icon="@MatIconNames.Delete" OnClick=@(new Action(() => OnRemove(this.Model))) />);
     }
 }

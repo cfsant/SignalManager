@@ -3,6 +3,13 @@
 @this.Body
 
 @code{
+    [Inject]
+    public DataController<IqOptionAdminSignalDomain> Controller
+    {
+        get;
+        set;
+    }
+
     [Parameter]
     public FolderDomain Model
     {
@@ -45,7 +52,32 @@
         }
 
         this.Content = new Collection<RenderFragment>();
-        this.Content.Add(@<FrmSignal Parent=this User="User" OnFormSubmitCallBack=@(new Action(ReRenderBody)) />);
-        this.Content.Add(@<GrdSignal Parent=this User="User" OnEditCallback=@(new Action(ReRenderBody)) OnRemoveCallback=@(new Action(ReRenderBody)) />);
+        this.Content.Add(@<FrmSignal Parent=this User="User" OnFormSubmitCallBack="OnFormSubmitCallBack" />);
+        this.Content.Add(@<GrdSignal Parent=this User="User" OnEditCallback="OnEditCallback" OnRemoveCallback="OnRemoveCallback" />);
+    }
+
+    private void OnFormSubmitCallBack()
+    {
+        if (this.Controller == null || this.Controller.Count < 1)
+        {
+            Console.WriteLine("A lista de sinais não contem itens.");
+        }
+
+        if (this.Controller.Count > 0)
+        {
+            Console.WriteLine($"Itens carregados: {this.Controller.Count}");
+        }
+
+        this.ReRenderBody();
+    }
+
+    private void OnEditCallback()
+    {
+        this.ReRenderBody();
+    }
+
+    private void OnRemoveCallback()
+    {
+        this.ReRenderBody();
     }
 }

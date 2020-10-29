@@ -28,6 +28,7 @@
             new Input<bool>() { Parent = content, Class="form-check-input", Type="checkbox", Value=this.Model.Selected }.RenderBody()
         };
 
+        this.Content = new Collection<RenderFragment>();
         this.Content.Add(content.RenderBody());
     }
 }

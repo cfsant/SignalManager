@@ -35,6 +35,8 @@
 
     protected override void LoadContent()
     {
+        this.Content = new Collection<RenderFragment>();
+
         this.Content.Add(@<GrdSignalEdit Parent="this" Model="this.Model" OnEdit="OnEdit" />);
         this.Content.Add(@<GrdSignalRemove Parent="this" Model="this.Model" OnRemove="OnRemove" />);
     }

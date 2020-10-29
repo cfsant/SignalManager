@@ -1,8 +1,12 @@
 ﻿@inherits Row<Signal>
+@this.Body
 
 @code {
     protected override Task OnInitializedAsync()
     {
+        this.Class = "d-inline-flex flex-row flex-wrap border-sm border-md border-lg tt-col-sm tt-col-md mt-2 w-100 min-sm-h-180";
+        this.Style = "border-radius:15px;";
+
         return Task.Run(() => {
             this.Body = this.RenderBody();
         });
@@ -10,6 +14,8 @@
 
     protected override void LoadContent()
     {
+        this.Content = new Collection<RenderFragment>();
+
         this.Content.Add(@<GrdSignalRowSelectedOption Parent="this" Model="this.Model"/>);
         this.Content.Add(@<GrdSignalCardView Parent="this" Model="this.Model"/>);
         this.Content.Add(@<GrdSignalRowEntry Parent="this" Model="this.Model"/>);

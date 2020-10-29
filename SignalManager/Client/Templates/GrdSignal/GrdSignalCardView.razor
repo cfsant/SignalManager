@@ -21,6 +21,7 @@
 
     protected override void LoadContent()
     {
+        this.Content = new Collection<RenderFragment>();
         this.Content.Add(@<Label Class="d-block d-xl-none d-lg-none d-md-block d-sm-block col-md-6 col-sm-6 align-self-center" Text="Data:" Bold="true" Style="max-height:18px" />);
         this.Content.Add(@<Label Class="d-block d-xl-none d-lg-none d-md-block d-sm-block col-md-3 col-sm-3 align-self-center" Text="Duração:" Bold="true" Style="max-height:18px" />);
         this.Content.Add(@<Label Class="d-block d-xl-none d-lg-none d-md-block d-sm-block col-md-3 col-sm-3 align-self-center text-right" Text="Valor:" Bold="true" Style="max-height:18px" />);
