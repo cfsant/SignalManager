@@ -21,8 +21,8 @@
 
     protected override void LoadContent()
     {
-        this.Content.Add(@<MatChip Label="@(Enum.GetName(typeof(IqOptionAdminSignalDomain.EnmActivePair), this.Model.ActivePair))" Class="bg-info text-white"/>);
-        this.Content.Add(@<MatChip Label="@(Enum.GetName(typeof(IqOptionAdminSignalDomain.EnmOrderDirection), this.Model.OrderDirection))" Class=@(((IqOptionAdminSignalDomain.EnmOrderDirection)this.Model.OrderDirection) == IqOptionAdminSignalDomain.EnmOrderDirection.Put ? "bg-success text-white" : "bg-danger text-white") />);
+        this.Content.Add(@<MatChip Label="@(Enum.GetName(typeof(ActivePair), this.Model.ActivePair))" Class="bg-info text-white"/>);
+        this.Content.Add(@<MatChip Label="@(Enum.GetName(typeof(OrderDirection), this.Model.OrderDirection))" Class=@(((OrderDirection)this.Model.OrderDirection) == OrderDirection.Put ? "bg-success text-white" : "bg-danger text-white") />);
         
         if (this.Model.MartinGaleCount > 0)
         {

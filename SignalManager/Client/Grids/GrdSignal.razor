@@ -354,7 +354,8 @@
             // MODAL
             BodyContainer.Content.Add(this.GetModal(BodyContainer, model));
 
-            Rows.Add(BodyContainer.RenderBody());
+            //Rows.Add(BodyContainer.RenderBody());
+            Rows.Add(@<GrdSignalRow Parent="Parent" Model="model" OnEdit="OnEdit" OnRemove="OnRemove" OnModelUpdate="OnModelUpdate" OnModalCancelation="OnModalCancelation" />);
         }
 
         return Rows;
@@ -386,30 +387,30 @@
     {
         if (Link)
         {
-            return @<MatIconButton Icon="@MatIconNames.Edit" OnClick=@(new Action(() => OnEdit(null, model))) />;
+            return @<MatIconButton Icon="@MatIconNames.Edit" OnClick=@(new Action(() => OnEdit(model))) />;
         }
 
-        return @<Button Class="btn btn-dark w-100" OnClick=@(new Action(() => OnEdit(null, model))) Text="Editar"/>;
+        return @<Button Class="btn btn-dark w-100" OnClick=@(new Action(() => OnEdit(model))) Text="Editar"/>;
     }
 
     private RenderFragment GetRemoveControl(Signal model, bool Link = false)
     {
         if (Link)
         {
-            return @<MatIconButton Icon="@MatIconNames.Delete" OnClick=@(new Action(() => OnRemove(null, model)))/>;
+            return @<MatIconButton Icon="@MatIconNames.Delete" OnClick=@(new Action(() => OnRemove(model)))/>;
         }
 
-        return @<Button Class="btn btn-dark w-100" OnClick=@(new Action(() => OnRemove(null, model))) Text="Remover"/>;
+        return @<Button Class="btn btn-dark w-100" OnClick=@(new Action(() => OnRemove(model))) Text="Remover"/>;
     }
 
-    private void OnEdit(MouseEventArgs e, Signal model)
+    private void OnEdit(Signal model)
     {
         model.Editing = true;
 
         this.OnEditCallback?.Invoke();
     }
 
-    private void OnRemove(MouseEventArgs e, Signal model)
+    private void OnRemove(Signal model)
     {
         this.Data.Remove(model);
 
