@@ -30,7 +30,7 @@
 
         this.Content = new Collection<RenderFragment>();
         this.Content.Add(@<FrmSignal Parent=this OnFormSubmitCallBack=@(new Action(ReRenderBody)) OnUserLinkCallback=@(new Action(SetUserLinkCallback))/>);
-        this.Content.Add(@<GrdSignal Parent=this OnEditCallback=@(new Action(ReRenderBody)) OnRemoveCallback=@(new Action(ReRenderBody))/>);
+        this.Content.Add(@<GrdSignal Parent=this OnEditCallback="OnEditCallback" OnRemoveCallback="OnRemoveCallback" />);
     }
 
     public override void ReRenderBody()
@@ -42,5 +42,15 @@
     public void SetUserLinkCallback()
     {
         this.OnUserLinkCallback?.Invoke();
+    }
+
+    private void OnEditCallback(Signal model)
+    {
+        this.ReRenderBody();
+    }
+
+    private void OnRemoveCallback(Signal model)
+    {
+        this.ReRenderBody();
     }
 }

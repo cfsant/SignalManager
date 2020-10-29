@@ -58,25 +58,15 @@
 
     private void OnFormSubmitCallBack()
     {
-        if (this.Controller == null || this.Controller.Count < 1)
-        {
-            Console.WriteLine("A lista de sinais não contem itens.");
-        }
-
-        if (this.Controller.Count > 0)
-        {
-            Console.WriteLine($"Itens carregados: {this.Controller.Count}");
-        }
-
         this.ReRenderBody();
     }
 
-    private void OnEditCallback()
+    private void OnEditCallback(Signal model)
     {
         this.ReRenderBody();
     }
 
-    private void OnRemoveCallback()
+    private void OnRemoveCallback(Signal model)
     {
         this.ReRenderBody();
     }

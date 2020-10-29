@@ -11,14 +11,14 @@
     }
 
     [Parameter]
-    public Action OnEditCallback
+    public Action<Signal> OnEditCallback
     {
         get;
         set;
     }
 
     [Parameter]
-    public Action OnRemoveCallback
+    public Action<Signal> OnRemoveCallback
     {
         get;
         set;
@@ -219,24 +219,10 @@
             Signal model = new Signal();
             model = Utils.Parse<IqOptionAdminSignalDomain, Signal>(item, model);
 
-            Rows.Add(@<GrdSignalRow Parent="Parent" Model="model" OnEdit="OnEdit" OnRemove="OnRemove" OnModelUpdate="OnModelUpdate" OnModalCancelation="OnModalCancelation" />);
+            Rows.Add(@<GrdSignalRow Parent="Parent" Model="model" OnEditCallback="OnEditCallback" OnRemoveCallback="OnRemoveCallback" OnModelUpdate="OnModelUpdate" OnModalCancelation="OnModalCancelation" />);
         }
 
         return Rows;
-    }
-
-    private void OnEdit(Signal model)
-    {
-        model.Editing = true;
-
-        this.OnEditCallback?.Invoke();
-    }
-
-    private void OnRemove(Signal model)
-    {
-        this.Data.Remove(model);
-
-        this.OnRemoveCallback?.Invoke();
     }
 
     private void OnModelUpdate(Signal model)

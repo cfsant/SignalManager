@@ -10,14 +10,21 @@
     }
 
     [Parameter]
-    public Action<Signal> OnEdit
+    public Action<Signal> OnEditCallback
     {
         get;
         set;
     }
 
     [Parameter]
-    public Action<Signal> OnRemove
+    public Action<Signal> OnRemoveCallback
+    {
+        get;
+        set;
+    }
+
+    [Parameter]
+    public Action ReRenderParentCallback
     {
         get;
         set;
@@ -38,7 +45,7 @@
     {
         this.Content = new Collection<RenderFragment>();
 
-        this.Content.Add(@<GrdSignalEdit Parent="this" Model="this.Model" OnEdit="OnEdit"/>);
-        this.Content.Add(@<GrdSignalRemove Parent="this" Model="this.Model" OnRemove="OnRemove"/>);
+        this.Content.Add(@<GrdSignalEdit Parent="this" Model="this.Model" OnEdit="OnEditCallback"/>);
+        this.Content.Add(@<GrdSignalRemove Parent="this" Model="this.Model" OnRemove="OnRemoveCallback"/>);
     }
 }

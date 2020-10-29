@@ -23,6 +23,13 @@
         set;
     }
 
+    [Parameter]
+    public Action ReRenderParentCallback
+    {
+        get;
+        set;
+    }
+
     protected override Task OnInitializedAsync()
     {
         this.Class = "col-1 d-xl-inline-flex d-lg-inline-flex d-md-none d-sm-none justify-content-end";
@@ -37,7 +44,19 @@
     {
         this.Content = new Collection<RenderFragment>();
 
-        this.Content.Add(@<GrdSignalEdit Parent="this" Model="this.Model" OnEdit="OnEdit" />);
-        this.Content.Add(@<GrdSignalRemove Parent="this" Model="this.Model" OnRemove="OnRemove" />);
+        this.Content.Add(@<GrdSignalEdit Parent="this" Model="this.Model" OnEdit="OnEditEvent" />);
+        this.Content.Add(@<GrdSignalRemove Parent="this" Model="this.Model" OnRemove="OnRemoveEvent" />);
+    }
+
+    private void OnEditEvent(Signal model)
+    {
+        this.OnEdit(model);
+        //this.ReRenderParentCallback.Invoke();
+    }
+
+    private void OnRemoveEvent(Signal model)
+    {
+        this.OnRemove(model);
+        this.ReRenderParentCallback.Invoke();
     }
 }

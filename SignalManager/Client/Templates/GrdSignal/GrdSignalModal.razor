@@ -41,7 +41,7 @@
         }
 
         return @<MatDialog @bind-IsOpen="@this.Model.Editing">
-                    <SignalModal Parent="this" Model="this.Model" OnModelUpdateCallback=@(new Action<Signal>((m) => OnModelUpdate(m))) OnCancelationCallback=@(new Action<Signal>((m) => OnModalCancelation(m))) />
+                    <SignalModal Parent="this" Model="this.Model" OnModelUpdateCallback="OnModelUpdate" OnCancelationCallback="OnModalCancelation" />
                 </MatDialog>;
     }
 }
