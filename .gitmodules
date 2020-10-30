@@ -1,6 +1,3 @@
-[submodule "IqTask"]
-	path = IqTask
-	url = https://github.com/veltenguilherme/IqTask.git
 [submodule "Crypto"]
 	path = Crypto
 	url = https://github.com/veltenguilherme/Crypto.git
